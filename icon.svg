@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#7c3aed"/>
+  <rect x="80" y="130" width="352" height="240" rx="28" fill="#1a1a2e" stroke="#a78bfa" stroke-width="8"/>
+  <rect x="80" y="142" width="352" height="52" rx="0" fill="#a78bfa" opacity="0.15"/>
+  <!-- Lightning bolt -->
+  <path d="M290 160 L230 275 L265 275 L220 360 L310 245 L275 245 Z"
+        fill="#a78bfa" opacity="0.9"/>
+</svg>

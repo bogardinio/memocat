@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FlashForge">
+  <meta name="theme-color" content="#0f0f1a">
+  <title>FlashForge</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── CSS Custom Properties ── */
+    :root {
+      --bg:          #0f0f1a;
+      --surface:     #1a1a2e;
+      --surface2:    #16213e;
+      --border:      #2a2a4a;
+      --accent:      #7c3aed;
+      --accent-l:    #a78bfa;
+      --text:        #e2e8f0;
+      --text-muted:  #94a3b8;
+      --again:       #ef4444;
+      --hard:        #f97316;
+      --good:        #10b981;
+      --easy:        #3b82f6;
+      --safe-top:    env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── App Shell ── */
+    #app {
+      height: 100dvh;
+      overflow: hidden;
+      position: relative;
+    }
+    .screen {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    .screen.active { display: flex; }
+
+    /* ── Header ── */
+    .header {
+      padding: calc(var(--safe-top) + 14px) 16px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .app-logo {
+      font-size: 20px;
+      margin-right: 4px;
+    }
+
+    /* ── Icon Button ── */
+    .icon-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .icon-btn:active { transform: scale(0.93); background: var(--border); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    /* ── Scrollable Content Area ── */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px;
+    }
+
+    /* ── Bottom Navigation ── */
+    .bottom-nav {
+      display: flex;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding-bottom: var(--safe-bottom);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 0 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: inherit;
+      transition: color 0.15s;
+    }
+    .nav-btn.active { color: var(--accent-l); }
+    .nav-btn svg { width: 24px; height: 24px; }
+
+    /* ── Deck Card ── */
+    .deck-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .deck-card:active { transform: scale(0.98); border-color: var(--accent); }
+    .deck-name {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .deck-stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .chip-due   { background: rgba(239,68,68,.15); color: #fca5a5; }
+    .chip-new   { background: rgba(59,130,246,.15); color: #93c5fd; }
+    .chip-total { background: rgba(148,163,184,.1);  color: var(--text-muted); }
+    .chip-done  { background: rgba(16,185,129,.15); color: #6ee7b7; }
+
+    .deck-cta {
+      margin-top: 14px;
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .deck-cta:active { transform: scale(0.97); background: #6d28d9; }
+    .deck-cta:disabled { background: var(--surface2); color: var(--text-muted); cursor: default; transform: none; }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state p { margin-top: 12px; font-size: 15px; }
+
+    /* ── Summary bar on Home ── */
+    .today-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-around;
+    }
+    .today-stat { text-align: center; }
+    .today-stat .val { font-size: 22px; font-weight: 700; }
+    .today-stat .lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Review Screen ── */
+    .review-header-info {
+      flex: 1;
+      text-align: center;
+    }
+    .review-deck-name {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .review-counter {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .progress-bar-wrap {
+      height: 4px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.4s ease;
+    }
+
+    .card-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      height: min(320px, 45dvh);
+      position: relative;
+    }
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      overflow: hidden;
+    }
+    .card-face-back { display: none; }
+    .card-inner.flipped .card-face:not(.card-face-back) { display: none; }
+    .card-inner.flipped .card-face-back { display: flex; }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--accent-l);
+      margin-bottom: 16px;
+    }
+    .card-text {
+      font-size: 22px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+      color: var(--text);
+    }
+    .card-face-back .card-text { font-size: 20px; }
+    .card-divider {
+      width: 40%;
+      height: 1px;
+      background: var(--border);
+      border: none;
+      margin: 16px 0;
+    }
+    .tap-hint {
+      position: absolute;
+      bottom: 18px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .tap-hint svg { width: 14px; height: 14px; opacity: 0.6; }
+
+    /* ── Rating Buttons ── */
+    .rating-area {
+      flex-shrink: 0;
+      padding: 12px 12px calc(12px + var(--safe-bottom));
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+    }
+    .rating-area.hidden { visibility: hidden; pointer-events: none; }
+
+    .rating-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.1s, filter 0.1s;
+    }
+    .rating-btn:active { transform: scale(0.95); filter: brightness(0.85); }
+    .rating-btn .r-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .rating-btn .r-ivl  { font-size: 11px; color: rgba(255,255,255,.7); }
+    .rating-btn.again { background: var(--again); }
+    .rating-btn.hard  { background: var(--hard); }
+    .rating-btn.good  { background: var(--good); }
+    .rating-btn.easy  { background: var(--easy); }
+
+    /* ── Session Done Screen ── */
+    .done-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      gap: 20px;
+      text-align: center;
+    }
+    .done-emoji { font-size: 64px; }
+    .done-title { font-size: 26px; font-weight: 700; }
+    .done-subtitle { color: var(--text-muted); font-size: 16px; }
+    .done-stats {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px 28px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+    }
+    .done-stat .val { font-size: 28px; font-weight: 700; color: var(--accent-l); }
+    .done-stat .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .done-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .done-btn:active { background: #6d28d9; }
+
+    /* ── Stats Screen ── */
+    .stats-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .stats-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+    }
+    .stats-kpi { text-align: center; }
+    .stats-kpi .val { font-size: 28px; font-weight: 700; color: var(--accent-l); }
+    .stats-kpi .lbl { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Activity Heatmap */
+    .heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .heatmap-day {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: var(--surface2);
+      cursor: default;
+    }
+    .heatmap-day[data-count="0"] { background: var(--surface2); }
+    .heatmap-day[data-count="1"] { background: rgba(124,58,237,.3); }
+    .heatmap-day[data-count="2"] { background: rgba(124,58,237,.5); }
+    .heatmap-day[data-count="3"] { background: rgba(124,58,237,.7); }
+    .heatmap-day[data-count="4"] { background: rgba(124,58,237,.9); }
+    .heatmap-dow {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+      padding-bottom: 4px;
+    }
+
+    .state-bars { display: flex; flex-direction: column; gap: 10px; }
+    .state-bar-row { display: flex; align-items: center; gap: 10px; }
+    .state-bar-label { width: 72px; font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+    .state-bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .state-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+    .bar-new      { background: var(--easy); }
+    .bar-learning { background: var(--hard); }
+    .bar-review   { background: var(--good); }
+    .state-bar-num { width: 32px; text-align: right; font-size: 13px; font-weight: 500; }
+
+    /* ── Import Screen ── */
+    .import-drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 18px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 16px;
+    }
+    .import-drop-zone:hover,
+    .import-drop-zone.drag-over {
+      border-color: var(--accent-l);
+      background: rgba(124,58,237,.08);
+    }
+    .import-drop-zone svg { width: 48px; height: 48px; color: var(--accent-l); }
+    .import-drop-zone p { margin-top: 12px; color: var(--text-muted); font-size: 15px; }
+    .import-drop-zone .hint { font-size: 12px; margin-top: 6px; }
+
+    .preview-card {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .preview-front { color: var(--text); font-weight: 500; }
+    .preview-back  { color: var(--text-muted); margin-top: 2px; }
+
+    .import-section-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .text-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .text-input:focus { border-color: var(--accent-l); }
+    .text-input::placeholder { color: var(--text-muted); }
+
+    .import-count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,58,237,.2);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 13px;
+      color: var(--accent-l);
+      margin-bottom: 16px;
+    }
+
+    .primary-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .primary-btn:active { transform: scale(0.98); background: #6d28d9; }
+    .primary-btn:disabled {
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: default;
+      transform: none;
+    }
+
+    /* ── Backup Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-sheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px calc(24px + var(--safe-bottom));
+      width: 100%;
+      max-width: 500px;
+    }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .modal-btn {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.15s;
+    }
+    .modal-btn:active { background: var(--border); }
+    .modal-btn svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--accent-l); }
+    .modal-cancel {
+      width: 100%;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: calc(80px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 10px 20px;
+      font-size: 14px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      pointer-events: none;
+      z-index: 200;
+      max-width: 90vw;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Backup Reminder Banner ── */
+    .backup-banner {
+      background: rgba(124,58,237,.15);
+      border: 1px solid rgba(124,58,237,.4);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      display: none;
+      gap: 10px;
+      align-items: center;
+    }
+    .backup-banner.show { display: flex; }
+    .backup-banner p { flex: 1; font-size: 13px; color: var(--accent-l); }
+    .backup-banner button {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* Hidden file input */
+    #file-input, #json-file-input { display: none; }
+
+    /* Section spacing */
+    .section { margin-bottom: 16px; }
+
+    /* No animations */
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  </style>
+</head>
+
+<body>
+<div id="app">
+
+  <!-- ════════════════════════════════════════
+       HOME SCREEN
+       ════════════════════════════════════════ -->
+  <div id="screen-home" class="screen active">
+    <div class="header">
+      <span class="app-logo">⚡</span>
+      <span class="header-title">FlashForge</span>
+      <button class="icon-btn" id="btn-import-nav" aria-label="CSV importieren" title="CSV importieren">
+        <!-- Upload icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btn-backup-open" aria-label="Backup & Export" title="Backup & Export">
+        <!-- Archive icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="21 8 21 21 3 21 3 8"/>
+          <rect x="1" y="3" width="22" height="5"/>
+          <line x1="10" y1="12" x2="14" y2="12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="content" id="home-content">
+      <!-- Backup reminder (hidden by default) -->
+      <div class="backup-banner" id="backup-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;color:var(--accent-l)">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p>Letztes Backup vor 7+ Tagen</p>
+        <button id="btn-quick-backup">Jetzt</button>
+      </div>
+
+      <!-- Today summary -->
+      <div class="today-bar" id="today-bar">
+        <div class="today-stat">
+          <div class="val" id="today-learned">–</div>
+          <div class="lbl">Gelernt</div>
+        </div>
+        <div class="today-stat">
+          <div class="val" id="today-due">–</div>
+          <div class="lbl">Fällig</div>
+        </div>
+        <div class="today-stat">
+          <div class="val" id="today-new">–</div>
+          <div class="lbl">Neu</div>
+        </div>
+      </div>
+
+      <!-- Deck list -->
+      <div id="deck-list">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-nav="home" aria-label="Startseite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Decks
+      </button>
+      <button class="nav-btn" data-nav="stats" aria-label="Statistiken">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Statistiken
+      </button>
+    </nav>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       REVIEW SCREEN
+       ════════════════════════════════════════ -->
+  <div id="screen-review" class="screen">
+    <div class="header">
+      <button class="icon-btn" id="btn-review-back" aria-label="Zurück">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="review-header-info">
+        <div class="review-deck-name" id="review-deck-name"></div>
+        <div class="review-counter" id="review-counter">0 / 0</div>
+      </div>
+      <div style="width:40px;"></div><!-- spacer -->
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+    </div>
+
+    <div class="card-area" id="card-area">
+      <div class="card" id="study-card" role="button" aria-label="Karte aufdecken">
+        <div class="card-inner" id="card-inner">
+          <!-- Front -->
+          <div class="card-face">
+            <div class="card-label">Vorderseite</div>
+            <div class="card-text" id="card-front-text"></div>
+            <div class="tap-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+              </svg>
+              Tippen zum Aufdecken
+            </div>
+          </div>
+          <!-- Back -->
+          <div class="card-face card-face-back">
+            <div class="card-label" style="color:var(--text-muted);font-size:10px;">
+              <span id="card-front-small"></span>
+            </div>
+            <hr class="card-divider">
+            <div class="card-label">Rückseite</div>
+            <div class="card-text" id="card-back-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rating-area hidden" id="rating-area">
+      <button class="rating-btn again" data-rating="0" aria-label="Nochmal">
+        <span class="r-name">Nochmal</span>
+        <span class="r-ivl" id="ivl-again"></span>
+      </button>
+      <button class="rating-btn hard" data-rating="1" aria-label="Schwer">
+        <span class="r-name">Schwer</span>
+        <span class="r-ivl" id="ivl-hard"></span>
+      </button>
+      <button class="rating-btn good" data-rating="2" aria-label="Gut">
+        <span class="r-name">Gut</span>
+        <span class="r-ivl" id="ivl-good"></span>
+      </button>
+      <button class="rating-btn easy" data-rating="3" aria-label="Leicht">
+        <span class="r-name">Leicht</span>
+        <span class="r-ivl" id="ivl-easy"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       SESSION DONE SCREEN
+       ════════════════════════════════════════ -->
+  <div id="screen-done" class="screen">
+    <div class="done-content">
+      <div class="done-emoji" id="done-emoji">🎉</div>
+      <div class="done-title">Session abgeschlossen!</div>
+      <div class="done-subtitle" id="done-subtitle">Gut gemacht!</div>
+      <div class="done-stats">
+        <div class="done-stat">
+          <div class="val" id="done-total"></div>
+          <div class="lbl">Karten</div>
+        </div>
+        <div class="done-stat">
+          <div class="val" id="done-correct"></div>
+          <div class="lbl">Gut / Leicht</div>
+        </div>
+        <div class="done-stat">
+          <div class="val" id="done-again"></div>
+          <div class="lbl">Nochmal</div>
+        </div>
+      </div>
+      <button class="done-btn" id="btn-done-home">Zurück zu Decks</button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       STATS SCREEN
+       ════════════════════════════════════════ -->
+  <div id="screen-stats" class="screen">
+    <div class="header">
+      <span class="app-logo">📊</span>
+      <span class="header-title">Statistiken</span>
+    </div>
+
+    <div class="content">
+      <!-- KPIs -->
+      <div class="stats-section">
+        <div class="stats-section-title">Heute</div>
+        <div class="stats-row">
+          <div class="stats-kpi">
+            <div class="val" id="stat-today-reviewed">–</div>
+            <div class="lbl">Gelernt</div>
+          </div>
+          <div class="stats-kpi">
+            <div class="val" id="stat-streak">–</div>
+            <div class="lbl">Streak 🔥</div>
+          </div>
+          <div class="stats-kpi">
+            <div class="val" id="stat-total-cards">–</div>
+            <div class="lbl">Karten</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity heatmap: last 35 days (5 weeks) -->
+      <div class="stats-section">
+        <div class="stats-section-title">Aktivität (letzte 5 Wochen)</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;">
+          <div class="heatmap-dow">Mo</div><div class="heatmap-dow">Di</div>
+          <div class="heatmap-dow">Mi</div><div class="heatmap-dow">Do</div>
+          <div class="heatmap-dow">Fr</div><div class="heatmap-dow">Sa</div>
+          <div class="heatmap-dow">So</div>
+        </div>
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+
+      <!-- Card distribution -->
+      <div class="stats-section">
+        <div class="stats-section-title">Karten-Verteilung</div>
+        <div class="state-bars" id="state-bars"></div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn" data-nav="home" aria-label="Startseite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Decks
+      </button>
+      <button class="nav-btn active" data-nav="stats" aria-label="Statistiken">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Statistiken
+      </button>
+    </nav>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       IMPORT SCREEN
+       ════════════════════════════════════════ -->
+  <div id="screen-import" class="screen">
+    <div class="header">
+      <button class="icon-btn" id="btn-import-back" aria-label="Zurück">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <span class="header-title">CSV importieren</span>
+    </div>
+
+    <div class="content">
+      <!-- Drop zone / file picker -->
+      <div class="import-drop-zone" id="import-drop-zone" role="button" aria-label="Datei auswählen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p>Datei auswählen</p>
+        <p class="hint" style="color:var(--text-muted);">.txt, .csv, .tsv — Anki-Export oder CSV</p>
+      </div>
+
+      <!-- Preview (hidden until file selected) -->
+      <div id="import-preview-area" style="display:none;">
+        <div id="import-count-badge" class="import-count-badge" style="margin-bottom:14px;"></div>
+
+        <div class="section">
+          <div class="import-section-label">Vorschau (erste 5 Karten)</div>
+          <div id="import-preview-list"></div>
+        </div>
+
+        <div class="section">
+          <div class="import-section-label">Deck-Name</div>
+          <input type="text" class="text-input" id="import-deck-name" placeholder="Name des Decks" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </div>
+
+        <button class="primary-btn" id="btn-confirm-import">Importieren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       BACKUP MODAL
+       ════════════════════════════════════════ -->
+  <div class="modal-overlay" id="backup-modal" role="dialog" aria-modal="true" aria-label="Backup & Export">
+    <div class="modal-sheet">
+      <div class="modal-title">Backup & Export</div>
+
+      <button class="modal-btn" id="btn-export-json">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        JSON Backup exportieren
+      </button>
+
+      <button class="modal-btn" id="btn-import-json-open">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        JSON Backup importieren
+      </button>
+
+      <button class="modal-btn" id="btn-export-csv-all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        CSV exportieren (Anki-kompatibel)
+      </button>
+
+      <button class="modal-cancel" id="btn-backup-cancel">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Rename Modal -->
+  <div class="modal-overlay" id="rename-modal" role="dialog" aria-modal="true">
+    <div class="modal-sheet">
+      <div class="modal-title">Deck umbenennen</div>
+      <input type="text" class="text-input" id="rename-input" placeholder="Deck-Name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin-bottom:12px;">
+      <button class="primary-btn" id="btn-rename-confirm">Speichern</button>
+      <button class="modal-cancel" id="btn-rename-cancel" style="margin-top:8px;">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Hidden file inputs -->
+  <input type="file" id="file-input" accept=".txt,.csv,.tsv" aria-hidden="true">
+  <input type="file" id="json-file-input" accept=".json" aria-hidden="true">
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+</div><!-- #app -->
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════════════════
+// DATABASE — IndexedDB Wrapper
+// ════════════════════════════════════════════════════════════
+class FlashDB {
+  constructor() { this.db = null; }
+
+  async init() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('flashforge', 2);
+
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('decks')) {
+          db.createObjectStore('decks', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('cards')) {
+          const cs = db.createObjectStore('cards', { keyPath: 'id', autoIncrement: true });
+          cs.createIndex('deckId', 'deckId');
+          cs.createIndex('dueDate', 'dueDate');
+        }
+        if (!db.objectStoreNames.contains('reviewLog')) {
+          const rl = db.createObjectStore('reviewLog', { keyPath: 'id', autoIncrement: true });
+          rl.createIndex('reviewedAt', 'reviewedAt');
+        }
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'key' });
+        }
+      };
+
+      req.onsuccess = e => { this.db = e.target.result; resolve(); };
+      req.onerror  = ()  => reject(req.error);
+    });
+  }
+
+  // ── Internal helpers ──
+  _promise(req) {
+    return new Promise((res, rej) => {
+      req.onsuccess = () => res(req.result);
+      req.onerror   = () => rej(req.error);
+    });
+  }
+  _store(name, mode = 'readonly') {
+    return this.db.transaction(name, mode).objectStore(name);
+  }
+  _getAll(store, indexName, key) {
+    const s = this._store(store);
+    const req = indexName ? s.index(indexName).getAll(key) : s.getAll();
+    return this._promise(req);
+  }
+
+  // ── Decks ──
+  getDecks()     { return this._getAll('decks'); }
+  getDeck(id)    { return this._promise(this._store('decks').get(id)); }
+  async addDeck(name) {
+    const deck = { name, createdAt: Date.now() };
+    deck.id = await this._promise(this._store('decks', 'readwrite').add(deck));
+    return deck;
+  }
+  updateDeck(deck) { return this._promise(this._store('decks', 'readwrite').put(deck)); }
+  async deleteDeck(id) {
+    const cards = await this.getCards(id);
+    const tx = this.db.transaction(['decks', 'cards'], 'readwrite');
+    cards.forEach(c => tx.objectStore('cards').delete(c.id));
+    tx.objectStore('decks').delete(id);
+    return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+  }
+
+  // ── Cards ──
+  getCards(deckId) { return this._getAll('cards', 'deckId', deckId); }
+  getAllCards()     { return this._getAll('cards'); }
+  updateCard(card) { return this._promise(this._store('cards', 'readwrite').put(card)); }
+
+  async addCards(cards) {
+    const tx = this.db.transaction('cards', 'readwrite');
+    const store = tx.objectStore('cards');
+    cards.forEach(c => store.add(c));
+    return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+  }
+
+  // ── Review Log ──
+  addReviewLog(entry) { return this._promise(this._store('reviewLog', 'readwrite').add(entry)); }
+  getReviewLogs()     { return this._getAll('reviewLog'); }
+
+  async getTodayLogs() {
+    const logs = await this.getReviewLogs();
+    const today = new Date().toDateString();
+    return logs.filter(l => new Date(l.reviewedAt).toDateString() === today);
+  }
+
+  // ── Settings ──
+  async getSetting(key) {
+    const r = await this._promise(this._store('settings').get(key));
+    return r ? r.value : null;
+  }
+  setSetting(key, value) {
+    return this._promise(this._store('settings', 'readwrite').put({ key, value }));
+  }
+
+  // ── Backup ──
+  async exportAll() {
+    const [decks, cards, reviewLog] = await Promise.all([
+      this.getDecks(), this.getAllCards(), this.getReviewLogs()
+    ]);
+    return { decks, cards, reviewLog, exportedAt: Date.now(), version: 2 };
+  }
+
+  async importAll(data) {
+    const tx = this.db.transaction(['decks', 'cards', 'reviewLog'], 'readwrite');
+    tx.objectStore('decks').clear();
+    tx.objectStore('cards').clear();
+    tx.objectStore('reviewLog').clear();
+    (data.decks     || []).forEach(d => tx.objectStore('decks').add(d));
+    (data.cards     || []).forEach(c => tx.objectStore('cards').add(c));
+    (data.reviewLog || []).forEach(l => tx.objectStore('reviewLog').add(l));
+    return new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = () => rej(tx.error); });
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// SM-2 SPACED REPETITION ALGORITHM
+// ════════════════════════════════════════════════════════════
+// rating: 0=Again, 1=Hard, 2=Good, 3=Easy
+function sm2(card, rating) {
+  const c = { ...card };
+
+  if (rating < 2) {
+    // Again / Hard: reset streak, short interval
+    c.repetition = 0;
+    c.interval   = 1;
+  } else {
+    // Good / Easy: advance
+    if (c.repetition === 0)      c.interval = 1;
+    else if (c.repetition === 1) c.interval = 6;
+    else                         c.interval = Math.round(c.interval * c.easeFactor);
+    c.repetition += 1;
+    // Extra boost for Easy
+    if (rating === 3) c.interval = Math.round(c.interval * 1.3);
+  }
+
+  // Ease factor adjustment (SM-2 formula)
+  c.easeFactor += 0.1 - (3 - rating) * (0.08 + (3 - rating) * 0.02);
+  c.easeFactor  = Math.max(1.3, Math.round(c.easeFactor * 1000) / 1000);
+
+  // State label
+  c.state = c.repetition === 0 ? 'new' : (c.interval < 7 ? 'learning' : 'review');
+
+  // Next due date
+  const due = new Date();
+  due.setDate(due.getDate() + c.interval);
+  c.dueDate = due.toISOString().split('T')[0];
+
+  return c;
+}
+
+// Preview next interval for each button without mutating card
+function previewIntervals(card) {
+  return [0, 1, 2, 3].map(r => sm2(card, r).interval);
+}
+
+function fmtInterval(days) {
+  if (days <= 1)  return '1 Tag';
+  if (days < 30)  return `${days} Tage`;
+  if (days < 365) return `${Math.round(days / 30)} Mon.`;
+  return `${(days / 365).toFixed(1)} J.`;
+}
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+// ════════════════════════════════════════════════════════════
+// CSV PARSER
+// ════════════════════════════════════════════════════════════
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+
+  // Auto-detect delimiter from first non-comment line
+  const sample = lines.find(l => l.trim() && !l.startsWith('#')) || '';
+  let delim = '\t';
+  if (!sample.includes('\t')) {
+    delim = sample.includes(';') ? ';' : ',';
+  }
+
+  const cards = [];
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+
+    const fields = splitCSVLine(t, delim);
+    if (fields.length < 2) continue;
+
+    const front = fields[0].trim();
+    const back  = fields[1].trim();
+    if (!front || !back) continue;
+
+    // Optional col 3 = deck name
+    const deckName = fields[2] ? fields[2].trim() : null;
+    cards.push({ front, back, deckName });
+  }
+  return cards;
+}
+
+// RFC 4180-style CSV field splitting with quote handling
+function splitCSVLine(line, delim) {
+  const fields = [];
+  let cur = '', inQ = false, i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i + 1] === '"') { cur += '"'; i += 2; continue; } // escaped quote
+      inQ = !inQ;
+    } else if (ch === delim && !inQ) {
+      fields.push(cur); cur = ''; i++; continue;
+    } else {
+      cur += ch;
+    }
+    i++;
+  }
+  fields.push(cur);
+  return fields;
+}
+
+// ════════════════════════════════════════════════════════════
+// APP STATE
+// ════════════════════════════════════════════════════════════
+const db    = new FlashDB();
+const state = {
+  // review session
+  reviewDeckId:   null,
+  reviewQueue:    [],   // array of card objects (due today)
+  reviewIdx:      0,
+  cardFlipped:    false,
+  sessionTotal:   0,
+  sessionCorrect: 0,
+  sessionAgain:   0,
+  // import
+  parsedCards:    [],
+};
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${screen}`).classList.add('active');
+  if (screen === 'home')  renderHome();
+  if (screen === 'stats') renderStats();
+}
+
+// ════════════════════════════════════════════════════════════
+// HOME SCREEN
+// ════════════════════════════════════════════════════════════
+async function renderHome() {
+  const today    = todayStr();
+  const [decks, allCards, todayLogs] = await Promise.all([
+    db.getDecks(), db.getAllCards(), db.getTodayLogs()
+  ]);
+
+  // Summary bar
+  const dueTotal = allCards.filter(c => c.dueDate <= today).length;
+  const newTotal = allCards.filter(c => c.state === 'new' || c.repetition === 0).length;
+  document.getElementById('today-learned').textContent = todayLogs.length;
+  document.getElementById('today-due').textContent     = dueTotal;
+  document.getElementById('today-new').textContent     = newTotal;
+
+  // Backup reminder
+  const lastBackup = await db.getSetting('lastBackupDate');
+  const daysSince  = lastBackup
+    ? Math.floor((Date.now() - lastBackup) / 86400000)
+    : 999;
+  document.getElementById('backup-banner').classList.toggle('show', daysSince >= 7 && allCards.length > 0);
+
+  // Deck list
+  const list = document.getElementById('deck-list');
+  if (decks.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div style="font-size:48px;">📂</div>
+        <p>Noch keine Decks.</p>
+        <p style="margin-top:6px;font-size:13px;color:var(--text-muted);">
+          Importiere eine CSV-Datei über das ↑ Icon oben rechts.
+        </p>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  for (const deck of decks) {
+    const cards   = allCards.filter(c => c.deckId === deck.id);
+    const dueList = cards.filter(c => c.dueDate <= today);
+    const newList = cards.filter(c => c.state === 'new' || c.repetition === 0);
+    const due     = dueList.length;
+    const newC    = newList.filter(c => c.dueDate <= today).length;
+    const allDue  = due;
+
+    const card = document.createElement('div');
+    card.className = 'deck-card';
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <div class="deck-name deck-name-text" style="margin-bottom:0;flex:1;">${escHtml(deck.name)}</div>
+        <button class="btn-rename-deck" aria-label="Umbenennen" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;flex-shrink:0;" title="Umbenennen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="deck-stats">
+        <span class="stat-chip chip-due">Fällig: ${allDue}</span>
+        <span class="stat-chip chip-new">Neu: ${newC}</span>
+        <span class="stat-chip chip-total">Gesamt: ${cards.length}</span>
+      </div>
+      <button class="deck-cta">
+        ${allDue > 0 ? `▶ Lernen (${allDue})` : '↺ Alles wiederholen'}
+      </button>`;
+
+    card.querySelector('.deck-cta').addEventListener('click', e => {
+      e.stopPropagation();
+      startReview(deck.id, deck.name, allDue === 0);
+    });
+
+    card.querySelector('.btn-rename-deck').addEventListener('click', e => {
+      e.stopPropagation();
+      openRenameModal(deck);
+    });
+
+    list.appendChild(card);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// REVIEW SESSION
+// ════════════════════════════════════════════════════════════
+async function startReview(deckId, deckName, forceAll = false) {
+  const today = todayStr();
+  const cards = await db.getCards(deckId);
+  const queue = forceAll ? [...cards] : cards.filter(c => c.dueDate <= today);
+
+  if (queue.length === 0) { showToast('Keine Karten im Deck!'); return; }
+
+  // Shuffle: new cards last, due-oldest first
+  queue.sort((a, b) => {
+    if (a.state === 'new' && b.state !== 'new') return 1;
+    if (a.state !== 'new' && b.state === 'new') return -1;
+    return a.dueDate.localeCompare(b.dueDate);
+  });
+
+  state.reviewDeckId   = deckId;
+  state.reviewQueue    = queue;
+  state.reviewIdx      = 0;
+  state.sessionTotal   = queue.length;
+  state.sessionCorrect = 0;
+  state.sessionAgain   = 0;
+
+  document.getElementById('review-deck-name').textContent = deckName;
+  navigate('review');
+  showCard();
+}
+
+function showCard() {
+  const card = state.reviewQueue[state.reviewIdx];
+  state.cardFlipped = false;
+
+  // Update counter + progress
+  const done = state.reviewIdx;
+  const total = state.sessionTotal;
+  document.getElementById('review-counter').textContent = `${done} / ${total}`;
+  document.getElementById('progress-bar').style.width = `${(done / total) * 100}%`;
+
+  // Fill card texts
+  document.getElementById('card-front-text').textContent  = card.front;
+  document.getElementById('card-front-small').textContent = card.front;
+  document.getElementById('card-back-text').textContent   = card.back;
+
+  // Reset flip
+  document.getElementById('card-inner').classList.remove('flipped');
+
+  // Hide rating buttons
+  document.getElementById('rating-area').classList.add('hidden');
+
+  // Preview intervals
+  const ivls = previewIntervals(card);
+  document.getElementById('ivl-again').textContent = fmtInterval(ivls[0]);
+  document.getElementById('ivl-hard').textContent  = fmtInterval(ivls[1]);
+  document.getElementById('ivl-good').textContent  = fmtInterval(ivls[2]);
+  document.getElementById('ivl-easy').textContent  = fmtInterval(ivls[3]);
+}
+
+function flipCard() {
+  if (state.cardFlipped) return;
+  state.cardFlipped = true;
+  document.getElementById('card-inner').classList.add('flipped');
+  document.getElementById('rating-area').classList.remove('hidden');
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+async function rateCard(rating) {
+  const card    = state.reviewQueue[state.reviewIdx];
+  const updated = sm2(card, rating);
+
+  await db.updateCard(updated);
+  await db.addReviewLog({ cardId: card.id, rating, reviewedAt: Date.now(), interval: updated.interval });
+
+  if (rating >= 2) state.sessionCorrect++;
+  else             state.sessionAgain++;
+
+  if (navigator.vibrate) navigator.vibrate(8);
+
+  state.reviewIdx++;
+  if (state.reviewIdx >= state.reviewQueue.length) {
+    showDone();
+  } else {
+    showCard();
+  }
+}
+
+function showDone() {
+  const pct = state.sessionTotal > 0
+    ? Math.round((state.sessionCorrect / state.sessionTotal) * 100)
+    : 0;
+
+  document.getElementById('done-total').textContent   = state.sessionTotal;
+  document.getElementById('done-correct').textContent = state.sessionCorrect;
+  document.getElementById('done-again').textContent   = state.sessionAgain;
+
+  const emoji = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚';
+  document.getElementById('done-emoji').textContent = emoji;
+  document.getElementById('done-subtitle').textContent =
+    pct >= 80 ? 'Sehr gut!' : pct >= 50 ? 'Weiter so!' : 'Übung macht den Meister!';
+
+  navigate('done');
+}
+
+// ════════════════════════════════════════════════════════════
+// IMPORT
+// ════════════════════════════════════════════════════════════
+function openImport() {
+  state.parsedCards = [];
+  document.getElementById('import-preview-area').style.display = 'none';
+  document.getElementById('import-drop-zone').style.display    = '';
+  document.getElementById('import-deck-name').value = '';
+  navigate('import');
+}
+
+async function handleFile(file) {
+  if (!file) return;
+  try {
+    const text   = await file.text();
+    const parsed = parseCSV(text);
+
+    if (parsed.length === 0) {
+      showToast('Keine Karten erkannt — Format prüfen');
+      return;
+    }
+
+    state.parsedCards = parsed;
+
+    // Suggest deck name from filename (strip extension)
+    const suggestedName = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    document.getElementById('import-deck-name').value = suggestedName;
+
+    // Count badge
+    document.getElementById('import-count-badge').innerHTML =
+      `✔ ${parsed.length} Karte${parsed.length !== 1 ? 'n' : ''} erkannt`;
+
+    // Preview: first 5
+    const preview = parsed.slice(0, 5);
+    document.getElementById('import-preview-list').innerHTML = preview.map(c =>
+      `<div class="preview-card">
+        <div class="preview-front">${escHtml(c.front)}</div>
+        <div class="preview-back">${escHtml(c.back)}</div>
+      </div>`
+    ).join('');
+
+    document.getElementById('import-preview-area').style.display = '';
+    document.getElementById('import-drop-zone').style.display    = 'none';
+
+  } catch (err) {
+    showToast('Fehler beim Lesen der Datei');
+    console.error(err);
+  }
+}
+
+async function confirmImport() {
+  const deckNameInput = document.getElementById('import-deck-name').value.trim();
+  if (!deckNameInput) { showToast('Bitte Deck-Namen eingeben'); return; }
+  if (state.parsedCards.length === 0) return;
+
+  const btn = document.getElementById('btn-confirm-import');
+  btn.disabled = true;
+  btn.textContent = 'Importiere…';
+
+  try {
+    // Group by deck name (col 3 overrides, else use input)
+    const groups = {};
+    for (const c of state.parsedCards) {
+      const name = c.deckName || deckNameInput;
+      if (!groups[name]) groups[name] = [];
+      groups[name].push(c);
+    }
+
+    const today = todayStr();
+    for (const [name, cards] of Object.entries(groups)) {
+      // Find or create deck
+      const decks   = await db.getDecks();
+      let deck      = decks.find(d => d.name === name);
+      if (!deck) deck = await db.addDeck(name);
+
+      // Build card objects
+      const cardObjs = cards.map(c => ({
+        deckId:     deck.id,
+        front:      c.front,
+        back:       c.back,
+        interval:   0,
+        repetition: 0,
+        easeFactor: 2.5,
+        dueDate:    today,
+        state:      'new',
+        createdAt:  Date.now(),
+      }));
+
+      await db.addCards(cardObjs);
+    }
+
+    const total = state.parsedCards.length;
+    showToast(`${total} Karte${total !== 1 ? 'n' : ''} importiert!`);
+    navigate('home');
+
+  } catch (err) {
+    showToast('Import fehlgeschlagen');
+    console.error(err);
+    btn.disabled = false;
+    btn.textContent = 'Importieren';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// STATISTICS
+// ════════════════════════════════════════════════════════════
+async function renderStats() {
+  const [allCards, logs] = await Promise.all([db.getAllCards(), db.getReviewLogs()]);
+
+  // Today
+  const today      = new Date().toDateString();
+  const todayCount = logs.filter(l => new Date(l.reviewedAt).toDateString() === today).length;
+  document.getElementById('stat-today-reviewed').textContent = todayCount;
+  document.getElementById('stat-total-cards').textContent    = allCards.length;
+
+  // Streak
+  document.getElementById('stat-streak').textContent = calcStreak(logs);
+
+  // Heatmap: last 35 days (5 × 7)
+  const activity = {};
+  logs.forEach(l => {
+    const key = new Date(l.reviewedAt).toISOString().split('T')[0];
+    activity[key] = (activity[key] || 0) + 1;
+  });
+  renderHeatmap(activity);
+
+  // State distribution
+  const counts = { new: 0, learning: 0, review: 0 };
+  allCards.forEach(c => {
+    const s = c.state || (c.repetition === 0 ? 'new' : c.interval < 7 ? 'learning' : 'review');
+    if (counts[s] !== undefined) counts[s]++;
+  });
+  renderStateBars(counts, allCards.length);
+}
+
+function calcStreak(logs) {
+  if (logs.length === 0) return 0;
+  const days = new Set(logs.map(l => new Date(l.reviewedAt).toDateString()));
+  let streak = 0;
+  const d = new Date();
+  for (let i = 0; i < 365; i++) {
+    if (days.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
+    else if (i === 0) { d.setDate(d.getDate() - 1); /* skip today if not studied yet */ }
+    else break;
+  }
+  return streak;
+}
+
+function renderHeatmap(activity) {
+  const heatmap = document.getElementById('heatmap');
+  heatmap.innerHTML = '';
+
+  // Start on last Monday 5 weeks ago
+  const end   = new Date();
+  const start = new Date(end);
+  // align to Monday
+  const dow = (end.getDay() + 6) % 7; // 0=Mon
+  start.setDate(end.getDate() - dow - 28); // 5 weeks back from last Monday
+
+  const d = new Date(start);
+  for (let i = 0; i < 35; i++) {
+    const key   = d.toISOString().split('T')[0];
+    const count = activity[key] || 0;
+    const level = count === 0 ? 0 : count < 5 ? 1 : count < 15 ? 2 : count < 30 ? 3 : 4;
+
+    const el = document.createElement('div');
+    el.className = 'heatmap-day';
+    el.dataset.count = level;
+    el.title = `${key}: ${count} Reviews`;
+    heatmap.appendChild(el);
+
+    d.setDate(d.getDate() + 1);
+  }
+}
+
+function renderStateBars(counts, total) {
+  const container = document.getElementById('state-bars');
+  const rows = [
+    { label: 'Neu',       key: 'new',      cls: 'bar-new'      },
+    { label: 'Lernen',    key: 'learning', cls: 'bar-learning'  },
+    { label: 'Wieder­holung', key: 'review', cls: 'bar-review' },
+  ];
+  container.innerHTML = rows.map(r => {
+    const n   = counts[r.key] || 0;
+    const pct = total > 0 ? Math.round((n / total) * 100) : 0;
+    return `<div class="state-bar-row">
+      <div class="state-bar-label">${r.label}</div>
+      <div class="state-bar-track">
+        <div class="state-bar-fill ${r.cls}" style="width:${pct}%"></div>
+      </div>
+      <div class="state-bar-num">${n}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// BACKUP / EXPORT
+// ════════════════════════════════════════════════════════════
+async function exportJSON() {
+  const data = await db.exportAll();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  downloadBlob(blob, `flashforge-backup-${todayStr()}.json`);
+  await db.setSetting('lastBackupDate', Date.now());
+  showToast('Backup exportiert');
+  closeBackupModal();
+}
+
+async function importJSON(file) {
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.decks || !data.cards) throw new Error('Ungültiges Format');
+    await db.importAll(data);
+    showToast(`Backup geladen: ${data.cards.length} Karten`);
+    navigate('home');
+  } catch (err) {
+    showToast('JSON ungültig oder beschädigt');
+    console.error(err);
+  }
+  closeBackupModal();
+}
+
+async function exportCSVAll() {
+  const [decks, allCards] = await Promise.all([db.getDecks(), db.getAllCards()]);
+  const rows = allCards.map(c => {
+    const deckName = (decks.find(d => d.id === c.deckId) || {}).name || '';
+    const esc = s => `"${String(s).replace(/"/g, '""')}"`;
+    return `${esc(c.front)};${esc(c.back)};${esc(deckName)}`;
+  });
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  downloadBlob(blob, `flashforge-export-${todayStr()}.csv`);
+  showToast('CSV exportiert');
+  closeBackupModal();
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function openBackupModal()  { document.getElementById('backup-modal').classList.add('open'); }
+function closeBackupModal() { document.getElementById('backup-modal').classList.remove('open'); }
+
+// ════════════════════════════════════════════════════════════
+// RENAME MODAL
+// ════════════════════════════════════════════════════════════
+let renameDeck = null;
+
+function openRenameModal(deck) {
+  renameDeck = deck;
+  const input = document.getElementById('rename-input');
+  input.value = deck.name;
+  document.getElementById('rename-modal').classList.add('open');
+  // slight delay so modal is visible before keyboard opens
+  setTimeout(() => { input.focus(); input.select(); }, 50);
+}
+
+function closeRenameModal() {
+  renameDeck = null;
+  document.getElementById('rename-modal').classList.remove('open');
+}
+
+async function confirmRename() {
+  if (!renameDeck) return;
+  const newName = document.getElementById('rename-input').value.trim();
+  if (newName && newName !== renameDeck.name) {
+    renameDeck.name = newName;
+    await db.updateDeck(renameDeck);
+  }
+  closeRenameModal();
+  renderHome();
+}
+
+// ════════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ════════════════════════════════════════════════════════════
+// UTILITY
+// ════════════════════════════════════════════════════════════
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ════════════════════════════════════════════════════════════
+// DEMO DATA (first launch)
+// ════════════════════════════════════════════════════════════
+const DEMO_CARDS = [
+  ['Guten Tag.',           'Dzień dobry.'],
+  ['Wie heißen Sie?',      'Jak się Pan nazywa?'],
+  ['Ich heiße Anna.',      'Nazywam się Anna.'],
+  ['Danke.',               'Dziękuję.'],
+  ['Auf Wiedersehen.',     'Do widzenia.'],
+  ['Bitte.',               'Proszę.'],
+  ['Entschuldigung.',      'Przepraszam.'],
+  ['Ja / Nein.',           'Tak / Nie.'],
+  ['Wo ist …?',            'Gdzie jest …?'],
+  ['Wie viel kostet das?', 'Ile to kosztuje?'],
+];
+
+async function seedDemoData() {
+  const decks = await db.getDecks();
+  if (decks.length > 0) return; // already seeded
+
+  const deck  = await db.addDeck('Deutsch-Polnisch');
+  const today = todayStr();
+  await db.addCards(DEMO_CARDS.map(([front, back]) => ({
+    deckId: deck.id, front, back,
+    interval: 0, repetition: 0, easeFactor: 2.5,
+    dueDate: today, state: 'new', createdAt: Date.now(),
+  })));
+}
+
+// ════════════════════════════════════════════════════════════
+// EVENT WIRING
+// ════════════════════════════════════════════════════════════
+function wireEvents() {
+  // Bottom navigation
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.nav;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll(`.nav-btn[data-nav="${target}"]`).forEach(b => b.classList.add('active'));
+      navigate(target);
+    });
+  });
+
+  // Home: open import
+  document.getElementById('btn-import-nav').addEventListener('click', openImport);
+
+  // Home: backup modal
+  document.getElementById('btn-backup-open').addEventListener('click', openBackupModal);
+  document.getElementById('btn-quick-backup').addEventListener('click', exportJSON);
+
+  // Review: back button
+  document.getElementById('btn-review-back').addEventListener('click', () => navigate('home'));
+
+  // Review: card flip on tap/click
+  const cardEl = document.getElementById('study-card');
+  cardEl.addEventListener('click',      flipCard);
+  cardEl.addEventListener('touchstart', e => { e.preventDefault(); flipCard(); }, { passive: false });
+
+  // Review: rating buttons
+  document.getElementById('rating-area').addEventListener('click', e => {
+    const btn = e.target.closest('.rating-btn');
+    if (btn) rateCard(Number(btn.dataset.rating));
+  });
+
+  // Done screen
+  document.getElementById('btn-done-home').addEventListener('click', () => navigate('home'));
+
+  // Import: file picker trigger
+  const dropZone = document.getElementById('import-drop-zone');
+  const fileInput = document.getElementById('file-input');
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('touchstart', e => { e.preventDefault(); fileInput.click(); }, { passive: false });
+
+  // Drag & drop (desktop convenience)
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  fileInput.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (f) handleFile(f);
+    fileInput.value = '';
+  });
+
+  document.getElementById('btn-confirm-import').addEventListener('click', confirmImport);
+  document.getElementById('btn-import-back').addEventListener('click', () => navigate('home'));
+
+  // Backup modal
+  document.getElementById('btn-export-json').addEventListener('click', exportJSON);
+  document.getElementById('btn-export-csv-all').addEventListener('click', exportCSVAll);
+  document.getElementById('btn-backup-cancel').addEventListener('click', closeBackupModal);
+  document.getElementById('backup-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeBackupModal();
+  });
+
+  // Rename modal
+  document.getElementById('btn-rename-confirm').addEventListener('click', confirmRename);
+  document.getElementById('btn-rename-cancel').addEventListener('click', closeRenameModal);
+  document.getElementById('rename-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeRenameModal();
+  });
+  document.getElementById('rename-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); confirmRename(); }
+    if (e.key === 'Escape') { closeRenameModal(); }
+  });
+
+  // JSON import
+  const jsonInput = document.getElementById('json-file-input');
+  document.getElementById('btn-import-json-open').addEventListener('click', () => jsonInput.click());
+  jsonInput.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (f) importJSON(f);
+    jsonInput.value = '';
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+// SERVICE WORKER REGISTRATION
+// ════════════════════════════════════════════════════════════
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js?v=2').catch(console.error);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════
+async function init() {
+  await db.init();
+  await seedDemoData();
+  wireEvents();
+  renderHome();
+  registerSW();
+}
+
+init().catch(console.error);
+</script>
+</body>
+</html>
