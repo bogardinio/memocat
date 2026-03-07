@@ -638,6 +638,19 @@
 
     /* No animations */
     *, *::before, *::after { transition: none !important; animation: none !important; }
+
+    /* ── Pin feature ── */
+    .card-pin-star {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 20px;
+      display: none;
+      pointer-events: none;
+    }
+    .card-pin-star.pinned { display: block; }
+    .chip-pinned { background: rgba(251,191,36,.15); color: #fcd34d; }
+    .icon-btn.pinned { color: #fbbf24; border-color: rgba(251,191,36,.5); background: rgba(251,191,36,.1); }
   </style>
 </head>
 
@@ -732,7 +745,17 @@
         <div class="review-deck-name" id="review-deck-name"></div>
         <div class="review-counter" id="review-counter">0 / 0</div>
       </div>
-      <div style="width:40px;"></div><!-- spacer -->
+      <button class="icon-btn" id="btn-pin-card" aria-label="Karte markieren" title="Karte markieren">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btn-edit-card" aria-label="Karte bearbeiten" title="Karte bearbeiten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
     </div>
 
     <div class="progress-bar-wrap">
@@ -744,6 +767,7 @@
         <div class="card-inner" id="card-inner">
           <!-- Front -->
           <div class="card-face">
+            <div class="card-pin-star" id="card-pin-star">⭐</div>
             <div class="card-label">Vorderseite</div>
             <div class="card-text" id="card-front-text"></div>
             <div class="tap-hint">
@@ -953,6 +977,31 @@
         CSV exportieren (Anki-kompatibel)
       </button>
 
+      <div style="border-top:1px solid var(--border);margin:12px 0 10px;"></div>
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;">GitHub Sync</div>
+
+      <button class="modal-btn" id="btn-gh-down">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/>
+        </svg>
+        Von GitHub laden
+      </button>
+      <button class="modal-btn" id="btn-gh-up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+          <path d="M20.88 18.09A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/>
+        </svg>
+        Auf GitHub speichern
+      </button>
+      <button class="modal-btn" id="btn-gh-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+        GitHub einrichten
+      </button>
+
       <button class="modal-cancel" id="btn-backup-cancel">Abbrechen</button>
     </div>
   </div>
@@ -964,6 +1013,39 @@
       <input type="text" class="text-input" id="rename-input" placeholder="Deck-Name" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin-bottom:12px;">
       <button class="primary-btn" id="btn-rename-confirm">Speichern</button>
       <button class="modal-cancel" id="btn-rename-cancel" style="margin-top:8px;">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- GitHub Settings Modal -->
+  <div class="modal-overlay" id="gh-modal" role="dialog" aria-modal="true" aria-label="GitHub Sync einrichten">
+    <div class="modal-sheet">
+      <div class="modal-title">GitHub Sync einrichten</div>
+      <div class="import-section-label" style="margin-top:0;">GitHub Owner / Repo</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+        <input type="text" class="text-input" id="gh-owner" placeholder="username" style="flex:1;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <span style="color:var(--text-muted);font-weight:600;">/</span>
+        <input type="text" class="text-input" id="gh-repo" placeholder="repo" style="flex:1;" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div class="import-section-label">Dateipfad im Repo</div>
+      <input type="text" class="text-input" id="gh-path" placeholder="data.json" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="margin-bottom:14px;">
+      <div class="import-section-label">Personal Access Token (PAT)</div>
+      <input type="password" class="text-input" id="gh-pat" placeholder="ghp_..." autocomplete="off" spellcheck="false" style="margin-bottom:6px;user-select:text;-webkit-user-select:text;">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Token wird nur lokal auf diesem Gerät gespeichert.</p>
+      <button class="primary-btn" id="btn-gh-save">Speichern</button>
+      <button class="modal-cancel" id="btn-gh-cancel" style="margin-top:8px;">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Edit Card Modal -->
+  <div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-label="Karte bearbeiten">
+    <div class="modal-sheet">
+      <div class="modal-title">Karte bearbeiten</div>
+      <div class="import-section-label" style="margin-top:0">Vorderseite</div>
+      <textarea class="text-input" id="edit-front" rows="3" style="resize:none;margin-bottom:14px;user-select:text;-webkit-user-select:text;"></textarea>
+      <div class="import-section-label">Rückseite</div>
+      <textarea class="text-input" id="edit-back" rows="3" style="resize:none;margin-bottom:14px;user-select:text;-webkit-user-select:text;"></textarea>
+      <button class="primary-btn" id="btn-edit-confirm">Speichern</button>
+      <button class="modal-cancel" id="btn-edit-cancel" style="margin-top:8px;">Abbrechen</button>
     </div>
   </div>
 
@@ -1267,12 +1349,14 @@ async function renderHome() {
 
   list.innerHTML = '';
   for (const deck of decks) {
-    const cards   = allCards.filter(c => c.deckId === deck.id);
-    const dueList = cards.filter(c => c.dueDate <= today);
-    const newList = cards.filter(c => c.state === 'new' || c.repetition === 0);
-    const due     = dueList.length;
-    const newC    = newList.filter(c => c.dueDate <= today).length;
-    const allDue  = due;
+    const cards      = allCards.filter(c => c.deckId === deck.id);
+    const dueList    = cards.filter(c => c.dueDate <= today);
+    const newList    = cards.filter(c => c.state === 'new' || c.repetition === 0);
+    const pinnedList = cards.filter(c => c.pinned);
+    const due        = dueList.length;
+    const newC       = newList.filter(c => c.dueDate <= today).length;
+    const allDue     = due;
+    const pinned     = pinnedList.length;
 
     const card = document.createElement('div');
     card.className = 'deck-card';
@@ -1290,15 +1374,27 @@ async function renderHome() {
         <span class="stat-chip chip-due">Fällig: ${allDue}</span>
         <span class="stat-chip chip-new">Neu: ${newC}</span>
         <span class="stat-chip chip-total">Gesamt: ${cards.length}</span>
+        ${pinned > 0 ? `<span class="stat-chip chip-pinned">⭐ ${pinned} markiert</span>` : ''}
       </div>
-      <button class="deck-cta">
-        ${allDue > 0 ? `▶ Lernen (${allDue})` : '↺ Alles wiederholen'}
-      </button>`;
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="deck-cta btn-study-deck" style="flex:1;margin-top:0;">
+          ${allDue > 0 ? `▶ Lernen (${allDue})` : '↺ Alles wiederholen'}
+        </button>
+        ${pinned > 0 ? `<button class="deck-cta btn-pinned-study" style="flex:0 0 auto;margin-top:0;padding:12px 14px;background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.3);" title="Nur markierte Karten lernen">⭐ Markierte</button>` : ''}
+      </div>`;
 
-    card.querySelector('.deck-cta').addEventListener('click', e => {
+    card.querySelector('.btn-study-deck').addEventListener('click', e => {
       e.stopPropagation();
       startReview(deck.id, deck.name, allDue === 0);
     });
+
+    const pinnedBtn = card.querySelector('.btn-pinned-study');
+    if (pinnedBtn) {
+      pinnedBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        startReview(deck.id, '⭐ ' + deck.name, false, true);
+      });
+    }
 
     card.querySelector('.btn-rename-deck').addEventListener('click', e => {
       e.stopPropagation();
@@ -1312,10 +1408,15 @@ async function renderHome() {
 // ════════════════════════════════════════════════════════════
 // REVIEW SESSION
 // ════════════════════════════════════════════════════════════
-async function startReview(deckId, deckName, forceAll = false) {
+async function startReview(deckId, deckName, forceAll = false, pinnedOnly = false) {
   const today = todayStr();
   const cards = await db.getCards(deckId);
-  const queue = forceAll ? [...cards] : cards.filter(c => c.dueDate <= today);
+  let queue;
+  if (pinnedOnly) {
+    queue = cards.filter(c => c.pinned);
+  } else {
+    queue = forceAll ? [...cards] : cards.filter(c => c.dueDate <= today);
+  }
 
   if (queue.length === 0) { showToast('Keine Karten im Deck!'); return; }
 
@@ -1365,6 +1466,11 @@ function showCard() {
   document.getElementById('ivl-hard').textContent  = fmtInterval(ivls[1]);
   document.getElementById('ivl-good').textContent  = fmtInterval(ivls[2]);
   document.getElementById('ivl-easy').textContent  = fmtInterval(ivls[3]);
+
+  // Update pin state
+  const pinned = !!card.pinned;
+  document.getElementById('btn-pin-card').classList.toggle('pinned', pinned);
+  document.getElementById('card-pin-star').classList.toggle('pinned', pinned);
 }
 
 function flipCard() {
@@ -1410,6 +1516,47 @@ function showDone() {
     pct >= 80 ? 'Sehr gut!' : pct >= 50 ? 'Weiter so!' : 'Übung macht den Meister!';
 
   navigate('done');
+  ghSyncUp(true).catch(console.error);
+}
+
+// ════════════════════════════════════════════════════════════
+// PIN & EDIT CARD
+// ════════════════════════════════════════════════════════════
+async function pinCurrentCard() {
+  const card = state.reviewQueue[state.reviewIdx];
+  card.pinned = !card.pinned;
+  await db.updateCard(card);
+  const pinned = !!card.pinned;
+  document.getElementById('btn-pin-card').classList.toggle('pinned', pinned);
+  document.getElementById('card-pin-star').classList.toggle('pinned', pinned);
+  showToast(pinned ? '⭐ Markiert' : 'Markierung entfernt');
+  ghSyncUp(true).catch(console.error);
+}
+
+function openEditModal() {
+  const card = state.reviewQueue[state.reviewIdx];
+  document.getElementById('edit-front').value = card.front;
+  document.getElementById('edit-back').value  = card.back;
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(() => document.getElementById('edit-front').focus(), 50);
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+async function confirmEdit() {
+  const card     = state.reviewQueue[state.reviewIdx];
+  const newFront = document.getElementById('edit-front').value.trim();
+  const newBack  = document.getElementById('edit-back').value.trim();
+  if (!newFront || !newBack) { showToast('Felder dürfen nicht leer sein'); return; }
+  card.front = newFront;
+  card.back  = newBack;
+  await db.updateCard(card);
+  closeEditModal();
+  showCard();
+  showToast('Karte gespeichert');
+  ghSyncUp(true).catch(console.error);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1608,6 +1755,121 @@ function renderStateBars(counts, total) {
 }
 
 // ════════════════════════════════════════════════════════════
+// GITHUB SYNC
+// ════════════════════════════════════════════════════════════
+function getGHSettings() {
+  try { return JSON.parse(localStorage.getItem('ff_github') || 'null'); }
+  catch { return null; }
+}
+
+function saveGHSettings(s) {
+  localStorage.setItem('ff_github', JSON.stringify(s));
+}
+
+async function ghGet(s) {
+  const url = `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${s.path}`;
+  const res = await fetch(url, {
+    headers: { 'Authorization': `Bearer ${s.pat}`, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const json = await res.json();
+  return {
+    sha:  json.sha,
+    data: JSON.parse(decodeURIComponent(escape(atob(json.content.replace(/\s/g, '')))))
+  };
+}
+
+async function ghPut(s, data, sha) {
+  const url     = `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${s.path}`;
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  const body    = { message: `FlashForge sync ${new Date().toISOString()}`, content };
+  if (sha) body.sha = sha;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${s.pat}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || res.status); }
+}
+
+async function ghSyncDown() {
+  const s = getGHSettings();
+  if (!s || !s.pat) { closeBackupModal(); openGHModal(); return; }
+  showToast('Lade von GitHub…');
+  try {
+    const { data } = await ghGet(s);
+    await db.importAll(data);
+    await db.setSetting('lastGHSync', Date.now());
+    showToast('Von GitHub geladen');
+    renderHome();
+  } catch (err) {
+    showToast('Download fehlgeschlagen: ' + err.message);
+    console.error(err);
+  }
+  closeBackupModal();
+}
+
+async function ghSyncUp(silent = false) {
+  const s = getGHSettings();
+  if (!s || !s.pat) return;
+  if (!silent) showToast('Lade auf GitHub hoch…');
+  try {
+    let sha;
+    try { const cur = await ghGet(s); sha = cur.sha; } catch { /* neue Datei */ }
+    const data = await db.exportAll();
+    await ghPut(s, data, sha);
+    await db.setSetting('lastGHSync', Date.now());
+    if (!silent) showToast('Auf GitHub gespeichert');
+  } catch (err) {
+    if (!silent) showToast('Upload fehlgeschlagen: ' + err.message);
+    console.error(err);
+  }
+  if (!silent) closeBackupModal();
+}
+
+async function ghAutoSync() {
+  const s = getGHSettings();
+  if (!s || !s.pat) return;
+  try {
+    const { data } = await ghGet(s);
+    await db.importAll(data);
+    await db.setSetting('lastGHSync', Date.now());
+    renderHome();
+    showToast('Sync von GitHub');
+  } catch (err) {
+    console.error('Auto-sync fehlgeschlagen:', err);
+  }
+}
+
+function openGHModal() {
+  const s = getGHSettings() || {};
+  document.getElementById('gh-owner').value = s.owner || 'bogardinio';
+  document.getElementById('gh-repo').value  = s.repo  || 'flashforge';
+  document.getElementById('gh-path').value  = s.path  || 'data.json';
+  document.getElementById('gh-pat').value   = s.pat   || '';
+  document.getElementById('gh-modal').classList.add('open');
+}
+
+function closeGHModal() {
+  document.getElementById('gh-modal').classList.remove('open');
+}
+
+function saveGHSettingsForm() {
+  const owner = document.getElementById('gh-owner').value.trim();
+  const repo  = document.getElementById('gh-repo').value.trim();
+  const path  = document.getElementById('gh-path').value.trim() || 'data.json';
+  const pat   = document.getElementById('gh-pat').value.trim();
+  if (!owner || !repo || !pat) { showToast('Alle Felder ausfüllen'); return; }
+  saveGHSettings({ owner, repo, path, pat });
+  closeGHModal();
+  showToast('GitHub-Einstellungen gespeichert');
+}
+
+// ════════════════════════════════════════════════════════════
 // BACKUP / EXPORT
 // ════════════════════════════════════════════════════════════
 async function exportJSON() {
@@ -1783,6 +2045,17 @@ function wireEvents() {
     if (btn) rateCard(Number(btn.dataset.rating));
   });
 
+  // Review: pin and edit buttons
+  document.getElementById('btn-pin-card').addEventListener('click', pinCurrentCard);
+  document.getElementById('btn-edit-card').addEventListener('click', openEditModal);
+
+  // Edit modal
+  document.getElementById('btn-edit-confirm').addEventListener('click', confirmEdit);
+  document.getElementById('btn-edit-cancel').addEventListener('click', closeEditModal);
+  document.getElementById('edit-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeEditModal();
+  });
+
   // Done screen
   document.getElementById('btn-done-home').addEventListener('click', () => navigate('home'));
 
@@ -1817,6 +2090,16 @@ function wireEvents() {
   document.getElementById('btn-backup-cancel').addEventListener('click', closeBackupModal);
   document.getElementById('backup-modal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeBackupModal();
+  });
+
+  // GitHub sync
+  document.getElementById('btn-gh-down').addEventListener('click', ghSyncDown);
+  document.getElementById('btn-gh-up').addEventListener('click', () => ghSyncUp(false));
+  document.getElementById('btn-gh-settings').addEventListener('click', () => { closeBackupModal(); openGHModal(); });
+  document.getElementById('btn-gh-save').addEventListener('click', saveGHSettingsForm);
+  document.getElementById('btn-gh-cancel').addEventListener('click', closeGHModal);
+  document.getElementById('gh-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeGHModal();
   });
 
   // Rename modal
@@ -1858,6 +2141,7 @@ async function init() {
   wireEvents();
   renderHome();
   registerSW();
+  ghAutoSync().catch(console.error);
 }
 
 init().catch(console.error);
