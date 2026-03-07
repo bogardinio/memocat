@@ -1,0 +1,251 @@
+{
+  "decks": [
+    {
+      "name": "Deutsch-Polnisch",
+      "createdAt": 1772865200269,
+      "id": 1
+    }
+  ],
+  "cards": [
+    {
+      "deckId": 1,
+      "front": "Wie war die Reise? MYedit",
+      "back": "Jak minęła podróż? (jak minewa podrusch?)",
+      "interval": 1,
+      "repetition": 0,
+      "easeFactor": 2.36,
+      "dueDate": "2026-03-08",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 1,
+      "pinned": true
+    },
+    {
+      "deckId": 1,
+      "front": "Ja",
+      "back": "Tak (tak)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 2
+    },
+    {
+      "deckId": 1,
+      "front": "Danke",
+      "back": "Dziękuję (dschjenkuje)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 3
+    },
+    {
+      "deckId": 1,
+      "front": "Sehr gut",
+      "back": "Bardzo dobrze (bardzo dobsche)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 4
+    },
+    {
+      "deckId": 1,
+      "front": "Wie heißen Sie? (formell)",
+      "back": "Jak się pan nazywa? (jak sche pan nasywa?)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 5
+    },
+    {
+      "deckId": 1,
+      "front": "Ich heiße…",
+      "back": "Nazywam się… (nasywam sche…)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 6
+    },
+    {
+      "deckId": 1,
+      "front": "Und Sie, wie heißen Sie?",
+      "back": "A pan, jak się pan nazywa? (a pan, jak sche pan nasywa?)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 7
+    },
+    {
+      "deckId": 1,
+      "front": "Wie heißt du? (informell)",
+      "back": "Jak się nazywasz? (jak sche nasywasz?)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 8
+    },
+    {
+      "deckId": 1,
+      "front": "Ich und du",
+      "back": "Ja i ty (ja i ty)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 9
+    },
+    {
+      "deckId": 1,
+      "front": "Freut mich",
+      "back": "Miło mi (miwo mi)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 10
+    },
+    {
+      "deckId": 1,
+      "front": "Sehr erfreut",
+      "back": "Bardzo mi miło (bardzo mi miwo)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 11
+    },
+    {
+      "deckId": 1,
+      "front": "Guten Tag",
+      "back": "Dzień dobry (dschenj dobry)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 12
+    },
+    {
+      "deckId": 1,
+      "front": "Guten Abend",
+      "back": "Dobry wieczór (dobry wjetschur)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 13
+    },
+    {
+      "deckId": 1,
+      "front": "Gute Nacht",
+      "back": "Dobranoc (dobranotz)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 14
+    },
+    {
+      "deckId": 1,
+      "front": "Hallo / Tschüss",
+      "back": "Cześć (tschesch-tsch)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 15
+    },
+    {
+      "deckId": 1,
+      "front": "Wie läuft's?",
+      "back": "Jak leci? (jak letzi?)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 16
+    },
+    {
+      "deckId": 1,
+      "front": "Hervorragend",
+      "back": "Świetnie (schwjetnje)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 17
+    },
+    {
+      "deckId": 1,
+      "front": "Und bei dir?",
+      "back": "A u ciebie? (a u tschebje?)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 18
+    },
+    {
+      "deckId": 1,
+      "front": "Ich kann nicht klagen",
+      "back": "Nie narzekam (nje naschekam)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-07",
+      "state": "new",
+      "createdAt": 1772865200271,
+      "id": 19
+    }
+  ],
+  "reviewLog": [
+    {
+      "cardId": 1,
+      "rating": 1,
+      "reviewedAt": 1772865239924,
+      "interval": 1,
+      "id": 1
+    }
+  ],
+  "exportedAt": 1772866987383,
+  "version": 2
+}
