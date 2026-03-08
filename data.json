@@ -237,7 +237,7 @@
       "state": "new",
       "createdAt": 1772966452962,
       "id": 19,
-      "pinned": false
+      "pinned": true
     }
   ],
   "reviewLog": [
@@ -543,6 +543,6 @@
       "id": 43
     }
   ],
-  "exportedAt": 1772970543294,
+  "exportedAt": 1772970719955,
   "version": 2
 }
