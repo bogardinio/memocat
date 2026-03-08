@@ -1,5 +1,5 @@
 // FlashForge Service Worker — Cache-First Offline Strategy
-const CACHE = 'flashforge-v2';
+const CACHE = 'flashforge-v3';
 
 // Only local assets — external URLs (fonts) are cached dynamically on first fetch
 const LOCAL_ASSETS = [
@@ -7,6 +7,7 @@ const LOCAL_ASSETS = [
   './index.html',
   './manifest.json',
   './anki-icon.png',
+  './polnisch_anki.csv',
 ];
 
 self.addEventListener('install', e => {

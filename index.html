@@ -10,9 +10,6 @@
   <title>FlashForge</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="anki-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* ── CSS Custom Properties ── */
@@ -39,7 +36,7 @@
       height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: system-ui, sans-serif;
       overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
@@ -651,6 +648,51 @@
     .card-pin-star.pinned { display: block; }
     .chip-pinned { background: rgba(251,191,36,.15); color: #fcd34d; }
     .icon-btn.pinned { color: #fbbf24; border-color: rgba(251,191,36,.5); background: rgba(251,191,36,.1); }
+
+    /* ── Deck Editor ── */
+    .editor-name-input {
+      flex: 1; background: transparent; border: none;
+      border-bottom: 1px solid transparent;
+      color: var(--text); font-size: 17px; font-weight: 700;
+      font-family: inherit; padding: 2px 4px; min-width: 0;
+      transition: border-color 0.15s;
+      -webkit-user-select: text; user-select: text;
+    }
+    .editor-name-input:focus { outline: none; border-bottom-color: var(--accent); }
+    .sync-dot { font-size: 13px; color: #f97316; margin: 0 2px; }
+    .editor-table { width: 100%; border-collapse: collapse; }
+    .editor-table th {
+      text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--text-muted); padding: 8px 6px;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg); z-index: 1;
+    }
+    .editor-table td { padding: 3px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .editor-cell {
+      width: 100%; background: transparent; border: 1px solid transparent;
+      border-radius: 6px; color: var(--text); font-size: 13px;
+      font-family: inherit; padding: 6px; resize: none; min-height: 38px;
+      box-sizing: border-box; transition: border-color 0.15s;
+      -webkit-user-select: text; user-select: text;
+    }
+    .editor-cell:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+    .editor-pin-btn {
+      background: none; border: none; font-size: 16px; cursor: pointer;
+      padding: 6px 4px; opacity: 0.25; transition: opacity 0.15s; display: block;
+    }
+    .editor-pin-btn.pinned { opacity: 1; }
+    .editor-del-btn {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      padding: 6px 4px; font-size: 16px; line-height: 1; display: block;
+    }
+    .editor-del-btn:active { color: var(--again); }
+    .editor-add-row {
+      width: 100%; padding: 12px; margin-top: 10px;
+      background: var(--surface); border: 1px dashed var(--border);
+      border-radius: 12px; color: var(--text-muted); font-size: 14px;
+      cursor: pointer; font-family: inherit;
+    }
+    .editor-add-row:active { background: var(--surface2); }
   </style>
 </head>
 
@@ -1056,6 +1098,47 @@
   <!-- Toast notification -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <!-- ════════════════════════════════════════
+       DECK EDITOR SCREEN
+       ════════════════════════════════════════ -->
+  <div id="screen-editor" class="screen">
+    <div class="header">
+      <button class="icon-btn" id="btn-editor-back" aria-label="Zurück">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <input type="text" class="editor-name-input" id="editor-deck-name"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <span class="sync-dot" id="editor-dirty-dot" style="display:none;" title="Nicht synchronisiert">●</span>
+      <button class="icon-btn" id="btn-editor-delete" aria-label="Deck löschen" title="Deck löschen" style="color:var(--again);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btn-editor-sync" aria-label="Speichern & Sync" title="Speichern & Sync">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="content" style="padding: 0 8px 16px;">
+      <table class="editor-table" id="editor-table">
+        <thead>
+          <tr>
+            <th style="width:43%">Vorderseite</th>
+            <th style="width:43%">Rückseite</th>
+            <th style="width:7%">⭐</th>
+            <th style="width:7%"></th>
+          </tr>
+        </thead>
+        <tbody id="editor-tbody"></tbody>
+      </table>
+      <button class="editor-add-row" id="btn-editor-add">+ Karte hinzufügen</button>
+    </div>
+  </div>
+
 </div><!-- #app -->
 
 <script>
@@ -1132,6 +1215,7 @@ class FlashDB {
   getCards(deckId) { return this._getAll('cards', 'deckId', deckId); }
   getAllCards()     { return this._getAll('cards'); }
   updateCard(card) { return this._promise(this._store('cards', 'readwrite').put(card)); }
+  deleteCard(id)   { return this._promise(this._store('cards', 'readwrite').delete(id)); }
 
   async addCards(cards) {
     const tx = this.db.transaction('cards', 'readwrite');
@@ -1398,7 +1482,7 @@ async function renderHome() {
 
     card.querySelector('.btn-rename-deck').addEventListener('click', e => {
       e.stopPropagation();
-      openRenameModal(deck);
+      openDeckEditor(deck);
     });
 
     list.appendChild(card);
@@ -1922,6 +2006,121 @@ function openBackupModal()  { document.getElementById('backup-modal').classList.
 function closeBackupModal() { document.getElementById('backup-modal').classList.remove('open'); }
 
 // ════════════════════════════════════════════════════════════
+// DECK EDITOR
+// ════════════════════════════════════════════════════════════
+let editorDeck = null;
+
+async function openDeckEditor(deck) {
+  editorDeck = deck;
+  document.getElementById('editor-deck-name').value = deck.name;
+  setEditorDirty(false);
+  const cards = await db.getCards(deck.id);
+  const tbody = document.getElementById('editor-tbody');
+  tbody.innerHTML = '';
+  cards.forEach(card => addEditorRow(card, tbody));
+  navigate('editor');
+}
+
+function setEditorDirty(dirty) {
+  document.getElementById('editor-dirty-dot').style.display = dirty ? 'inline' : 'none';
+}
+
+function addEditorRow(card, tbody) {
+  if (!tbody) tbody = document.getElementById('editor-tbody');
+  const tr = document.createElement('tr');
+  tr.dataset.cardId = card.id;
+
+  const makeTA = (field) => {
+    const ta = document.createElement('textarea');
+    ta.className = 'editor-cell';
+    ta.value = card[field];
+    ta.rows = 2;
+    ta.setAttribute('autocorrect', 'off');
+    ta.setAttribute('autocapitalize', 'off');
+    ta.setAttribute('spellcheck', 'false');
+    ta.addEventListener('blur', async () => {
+      const val = ta.value.trim();
+      if (val !== card[field]) {
+        card[field] = val;
+        await db.updateCard(card);
+        setEditorDirty(true);
+      }
+    });
+    return ta;
+  };
+
+  const tdFront = document.createElement('td');
+  tdFront.appendChild(makeTA('front'));
+
+  const tdBack = document.createElement('td');
+  tdBack.appendChild(makeTA('back'));
+
+  const tdPin = document.createElement('td');
+  const pinBtn = document.createElement('button');
+  pinBtn.className = 'editor-pin-btn' + (card.pinned ? ' pinned' : '');
+  pinBtn.textContent = '⭐';
+  pinBtn.title = card.pinned ? 'Markierung entfernen' : 'Karte markieren';
+  pinBtn.addEventListener('click', async () => {
+    card.pinned = !card.pinned;
+    await db.updateCard(card);
+    pinBtn.classList.toggle('pinned', !!card.pinned);
+    pinBtn.title = card.pinned ? 'Markierung entfernen' : 'Karte markieren';
+    setEditorDirty(true);
+  });
+  tdPin.appendChild(pinBtn);
+
+  const tdDel = document.createElement('td');
+  const delBtn = document.createElement('button');
+  delBtn.className = 'editor-del-btn';
+  delBtn.textContent = '🗑';
+  delBtn.title = 'Karte löschen';
+  delBtn.addEventListener('click', async () => {
+    if (!confirm('Karte löschen?')) return;
+    await db.deleteCard(card.id);
+    tr.remove();
+    setEditorDirty(true);
+  });
+  tdDel.appendChild(delBtn);
+
+  tr.appendChild(tdFront);
+  tr.appendChild(tdBack);
+  tr.appendChild(tdPin);
+  tr.appendChild(tdDel);
+  tbody.appendChild(tr);
+}
+
+async function addNewEditorCard() {
+  const today = todayStr();
+  const newCard = {
+    deckId: editorDeck.id, front: '', back: '',
+    interval: 0, repetition: 0, easeFactor: 2.5,
+    dueDate: today, state: 'new', createdAt: Date.now(),
+  };
+  const store = db._store('cards', 'readwrite');
+  const req   = store.add(newCard);
+  await new Promise((res, rej) => {
+    req.onsuccess = () => { newCard.id = req.result; res(); };
+    req.onerror   = () => rej(req.error);
+  });
+  const tbody = document.getElementById('editor-tbody');
+  addEditorRow(newCard, tbody);
+  setEditorDirty(true);
+  const lastRow = tbody.lastElementChild;
+  if (lastRow) {
+    const ta = lastRow.querySelector('textarea');
+    if (ta) { ta.focus(); ta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }
+}
+
+async function saveEditorDeckName() {
+  const newName = document.getElementById('editor-deck-name').value.trim();
+  if (newName && newName !== editorDeck.name) {
+    editorDeck.name = newName;
+    await db.updateDeck(editorDeck);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 // RENAME MODAL
 // ════════════════════════════════════════════════════════════
 let renameDeck = null;
@@ -1973,37 +2172,28 @@ function escHtml(s) {
 }
 
 // ════════════════════════════════════════════════════════════
-// DEMO DATA (first launch)
+// DEFAULT DECK (first launch)
 // ════════════════════════════════════════════════════════════
-const DEMO_CARDS = [
-  ['Wie war die Reise?',              'Jak minęła podróż? (jak minewa podrusch?)'],
-  ['Ja',                              'Tak (tak)'],
-  ['Danke',                           'Dziękuję (dschjenkuje)'],
-  ['Sehr gut',                        'Bardzo dobrze (bardzo dobsche)'],
-  ['Wie heißen Sie? (formell)',        'Jak się pan nazywa? (jak sche pan nasywa?)'],
-  ['Ich heiße…',                      'Nazywam się… (nasywam sche…)'],
-  ['Und Sie, wie heißen Sie?',        'A pan, jak się pan nazywa? (a pan, jak sche pan nasywa?)'],
-  ['Wie heißt du? (informell)',        'Jak się nazywasz? (jak sche nasywasz?)'],
-  ['Ich und du',                      'Ja i ty (ja i ty)'],
-  ['Freut mich',                      'Miło mi (miwo mi)'],
-  ['Sehr erfreut',                    'Bardzo mi miło (bardzo mi miwo)'],
-  ['Guten Tag',                       'Dzień dobry (dschenj dobry)'],
-  ['Guten Abend',                     'Dobry wieczór (dobry wjetschur)'],
-  ['Gute Nacht',                      'Dobranoc (dobranotz)'],
-  ['Hallo / Tschüss',                 'Cześć (tschesch-tsch)'],
-  ['Wie läuft\'s?',                   'Jak leci? (jak letzi?)'],
-  ['Hervorragend',                    'Świetnie (schwjetnje)'],
-  ['Und bei dir?',                    'A u ciebie? (a u tschebje?)'],
-  ['Ich kann nicht klagen',           'Nie narzekam (nje naschekam)'],
-];
-
 async function seedDemoData() {
   const decks = await db.getDecks();
   if (decks.length > 0) return; // already seeded
 
+  let cards = [];
+  try {
+    const res  = await fetch('./polnisch_anki.csv');
+    const text = await res.text();
+    cards = text.trim().split('\n').map(line => {
+      const parts = line.split(';').map(p => p.replace(/^"|"$/g, '').trim());
+      return [parts[0], parts[1]];
+    }).filter(([f, b]) => f && b);
+  } catch (e) {
+    console.warn('polnisch_anki.csv nicht ladbar:', e);
+    return;
+  }
+
   const deck  = await db.addDeck('Deutsch-Polnisch');
   const today = todayStr();
-  await db.addCards(DEMO_CARDS.map(([front, back]) => ({
+  await db.addCards(cards.map(([front, back]) => ({
     deckId: deck.id, front, back,
     interval: 0, repetition: 0, easeFactor: 2.5,
     dueDate: today, state: 'new', createdAt: Date.now(),
@@ -2102,6 +2292,24 @@ function wireEvents() {
     if (e.target === e.currentTarget) closeGHModal();
   });
 
+  // Deck editor
+  document.getElementById('btn-editor-back').addEventListener('click', async () => {
+    await saveEditorDeckName();
+    navigate('home');
+  });
+  document.getElementById('btn-editor-sync').addEventListener('click', async () => {
+    await saveEditorDeckName();
+    setEditorDirty(false);
+    await ghSyncUp(false);
+  });
+  document.getElementById('btn-editor-add').addEventListener('click', addNewEditorCard);
+  document.getElementById('editor-deck-name').addEventListener('input', () => setEditorDirty(true));
+  document.getElementById('btn-editor-delete').addEventListener('click', async () => {
+    if (!confirm(`Deck "${editorDeck.name}" und alle Karten löschen?`)) return;
+    await db.deleteDeck(editorDeck.id);
+    navigate('home');
+  });
+
   // Rename modal
   document.getElementById('btn-rename-confirm').addEventListener('click', confirmRename);
   document.getElementById('btn-rename-cancel').addEventListener('click', closeRenameModal);
@@ -2128,7 +2336,7 @@ function wireEvents() {
 // ════════════════════════════════════════════════════════════
 function registerSW() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js?v=2').catch(console.error);
+    navigator.serviceWorker.register('./sw.js?v=3').catch(console.error);
   }
 }
 
