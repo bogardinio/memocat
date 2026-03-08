@@ -238,6 +238,18 @@
       "createdAt": 1772966452962,
       "id": 19,
       "pinned": true
+    },
+    {
+      "deckId": 1,
+      "front": "wir fahren",
+      "back": "je dschemme",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-08",
+      "state": "new",
+      "createdAt": 1772978136811,
+      "id": 20
     }
   ],
   "reviewLog": [
@@ -543,6 +555,6 @@
       "id": 43
     }
   ],
-  "exportedAt": 1772970719955,
+  "exportedAt": 1772978154518,
   "version": 2
 }
