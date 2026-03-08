@@ -179,10 +179,10 @@
       "deckId": 1,
       "front": "Hallo / Tschüss",
       "back": "Cześć (tschesch-tsch)",
-      "interval": 1,
-      "repetition": 1,
+      "interval": 6,
+      "repetition": 2,
       "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
+      "dueDate": "2026-03-14",
       "state": "learning",
       "createdAt": 1772966452962,
       "id": 15,
@@ -192,11 +192,11 @@
       "deckId": 1,
       "front": "Wie läuft's?",
       "back": "Jak leci? (jak letzi?)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
+      "interval": 8,
+      "repetition": 2,
+      "easeFactor": 2.7,
+      "dueDate": "2026-03-16",
+      "state": "review",
       "createdAt": 1772966452962,
       "id": 16,
       "pinned": true
@@ -428,8 +428,22 @@
       "reviewedAt": 1772966626249,
       "interval": 1,
       "id": 27
+    },
+    {
+      "cardId": 15,
+      "rating": 2,
+      "reviewedAt": 1772970146629,
+      "interval": 6,
+      "id": 28
+    },
+    {
+      "cardId": 16,
+      "rating": 3,
+      "reviewedAt": 1772970149900,
+      "interval": 8,
+      "id": 29
     }
   ],
-  "exportedAt": 1772970079429,
+  "exportedAt": 1772970149953,
   "version": 2
 }
