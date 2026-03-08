@@ -179,11 +179,11 @@
       "deckId": 1,
       "front": "Hallo / Tschüss",
       "back": "Cześć (tschesch-tsch)",
-      "interval": 21,
-      "repetition": 3,
-      "easeFactor": 2.7,
-      "dueDate": "2026-03-29",
-      "state": "review",
+      "interval": 1,
+      "repetition": 0,
+      "easeFactor": 2.56,
+      "dueDate": "2026-03-09",
+      "state": "new",
       "createdAt": 1772966452962,
       "id": 15,
       "pinned": true
@@ -218,10 +218,10 @@
       "front": "Und bei dir?",
       "back": "A u ciebie? (a u tschebje?)",
       "interval": 1,
-      "repetition": 0,
+      "repetition": 1,
       "easeFactor": 2.28,
       "dueDate": "2026-03-09",
-      "state": "new",
+      "state": "learning",
       "createdAt": 1772966452962,
       "id": 18,
       "pinned": true
@@ -231,10 +231,10 @@
       "front": "Ich kann nicht klagen",
       "back": "Nie narzekam (nje naschekam)",
       "interval": 1,
-      "repetition": 0,
+      "repetition": 1,
       "easeFactor": 1.72,
       "dueDate": "2026-03-09",
-      "state": "new",
+      "state": "learning",
       "createdAt": 1772966452962,
       "id": 19,
       "pinned": true
@@ -553,8 +553,29 @@
       "reviewedAt": 1772970236495,
       "interval": 21,
       "id": 43
+    },
+    {
+      "cardId": 15,
+      "rating": 1,
+      "reviewedAt": 1772978851923,
+      "interval": 1,
+      "id": 44
+    },
+    {
+      "cardId": 18,
+      "rating": 2,
+      "reviewedAt": 1772978860185,
+      "interval": 1,
+      "id": 45
+    },
+    {
+      "cardId": 19,
+      "rating": 2,
+      "reviewedAt": 1772978868809,
+      "interval": 1,
+      "id": 46
     }
   ],
-  "exportedAt": 1772978154518,
+  "exportedAt": 1772978868879,
   "version": 2
 }
