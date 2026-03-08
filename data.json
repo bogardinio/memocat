@@ -2,434 +2,141 @@
   "decks": [
     {
       "name": "Deutsch-Polnisch",
-      "createdAt": 1772966452962,
+      "createdAt": 1772690692286,
       "id": 1
     }
   ],
   "cards": [
     {
       "deckId": 1,
-      "front": "Wie war die Reise?",
-      "back": "Jak minęła podróż? (jak minewa podrusch?)",
+      "front": "Guten Tag.",
+      "back": "Dzień dobry.",
       "interval": 1,
       "repetition": 1,
       "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
+      "dueDate": "2026-03-08",
       "state": "learning",
-      "createdAt": 1772966452962,
+      "createdAt": 1772690692286,
       "id": 1
     },
     {
       "deckId": 1,
-      "front": "Ja",
-      "back": "Tak (tak)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
+      "front": "Wie heißen Sie? hand edit",
+      "back": "Jak się Pan nazywa?",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
+      "state": "new",
+      "createdAt": 1772690692286,
       "id": 2
     },
     {
       "deckId": 1,
-      "front": "Danke",
-      "back": "Dziękuję (dschjenkuje)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
+      "front": "Ich heiße Anna.",
+      "back": "Nazywam się Anna.",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
+      "state": "new",
+      "createdAt": 1772690692286,
       "id": 3
     },
     {
       "deckId": 1,
-      "front": "Sehr gut",
-      "back": "Bardzo dobrze (bardzo dobsche)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
+      "front": "Danke.",
+      "back": "Dziękuję.",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
+      "state": "new",
+      "createdAt": 1772690692286,
       "id": 4
     },
     {
       "deckId": 1,
-      "front": "Wie heißen Sie? (formell)",
-      "back": "Jak się pan nazywa? (jak sche pan nasywa?)",
-      "interval": 1,
+      "front": "Auf Wiedersehen.",
+      "back": "Do widzenia.",
+      "interval": 0,
       "repetition": 0,
-      "easeFactor": 2.36,
-      "dueDate": "2026-03-09",
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
       "state": "new",
-      "createdAt": 1772966452962,
+      "createdAt": 1772690692286,
       "id": 5
     },
     {
       "deckId": 1,
-      "front": "Ich heiße…",
-      "back": "Nazywam się… (nasywam sche…)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.28,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
+      "front": "Bitte.",
+      "back": "Proszę.",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
+      "state": "new",
+      "createdAt": 1772690692286,
       "id": 6
     },
     {
       "deckId": 1,
-      "front": "Und Sie, wie heißen Sie?",
-      "back": "A pan, jak się pan nazywa? (a pan, jak sche pan nasywa?)",
-      "interval": 1,
+      "front": "Entschuldigung.",
+      "back": "Przepraszam.",
+      "interval": 0,
       "repetition": 0,
-      "easeFactor": 2.04,
-      "dueDate": "2026-03-09",
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
       "state": "new",
-      "createdAt": 1772966452962,
+      "createdAt": 1772690692286,
       "id": 7
     },
     {
       "deckId": 1,
-      "front": "Wie heißt du? (informell)",
-      "back": "Jak się nazywasz? (jak sche nasywasz?)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
+      "front": "Ja / Nein.",
+      "back": "Tak / Nie.",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
+      "state": "new",
+      "createdAt": 1772690692286,
       "id": 8
     },
     {
       "deckId": 1,
-      "front": "Ich und du",
-      "back": "Ja i ty (ja i ty)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
+      "front": "Wo ist …?",
+      "back": "Gdzie jest …?",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
+      "state": "new",
+      "createdAt": 1772690692286,
       "id": 9
     },
     {
       "deckId": 1,
-      "front": "Freut mich",
-      "back": "Miło mi (miwo mi)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
+      "front": "Wie viel kostet das?",
+      "back": "Ile to kosztuje?",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-05",
+      "state": "new",
+      "createdAt": 1772690692286,
       "id": 10
-    },
-    {
-      "deckId": 1,
-      "front": "Sehr erfreut",
-      "back": "Bardzo mi miło (bardzo mi miwo)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.28,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
-      "id": 11
-    },
-    {
-      "deckId": 1,
-      "front": "Guten Tag",
-      "back": "Dzień dobry (dschenj dobry)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 1.86,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
-      "id": 12
-    },
-    {
-      "deckId": 1,
-      "front": "Guten Abend",
-      "back": "Dobry wieczór (dobry wjetschur)",
-      "interval": 1,
-      "repetition": 0,
-      "easeFactor": 2.04,
-      "dueDate": "2026-03-09",
-      "state": "new",
-      "createdAt": 1772966452962,
-      "id": 13
-    },
-    {
-      "deckId": 1,
-      "front": "Gute Nacht",
-      "back": "Dobranoc (dobranotz)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
-      "id": 14
-    },
-    {
-      "deckId": 1,
-      "front": "Hallo / Tschüss",
-      "back": "Cześć (tschesch-tsch)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
-      "id": 15,
-      "pinned": true
-    },
-    {
-      "deckId": 1,
-      "front": "Wie läuft's?",
-      "back": "Jak leci? (jak letzi?)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
-      "id": 16,
-      "pinned": false
-    },
-    {
-      "deckId": 1,
-      "front": "Hervorragend",
-      "back": "Świetnie (schwjetnje)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
-      "id": 17
-    },
-    {
-      "deckId": 1,
-      "front": "Und bei dir?",
-      "back": "A u ciebie? (a u tschebje?)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.6,
-      "dueDate": "2026-03-09",
-      "state": "learning",
-      "createdAt": 1772966452962,
-      "id": 18
-    },
-    {
-      "deckId": 1,
-      "front": "Ich kann nicht klagen",
-      "back": "Nie narzekam (nje naschekam)",
-      "interval": 1,
-      "repetition": 0,
-      "easeFactor": 1.72,
-      "dueDate": "2026-03-09",
-      "state": "new",
-      "createdAt": 1772966452962,
-      "id": 19,
-      "pinned": false
     }
   ],
   "reviewLog": [
     {
       "cardId": 1,
       "rating": 3,
-      "reviewedAt": 1772966490354,
+      "reviewedAt": 1772868720764,
       "interval": 1,
       "id": 1
-    },
-    {
-      "cardId": 2,
-      "rating": 3,
-      "reviewedAt": 1772966494971,
-      "interval": 1,
-      "id": 2
-    },
-    {
-      "cardId": 3,
-      "rating": 3,
-      "reviewedAt": 1772966497104,
-      "interval": 1,
-      "id": 3
-    },
-    {
-      "cardId": 4,
-      "rating": 3,
-      "reviewedAt": 1772966500713,
-      "interval": 1,
-      "id": 4
-    },
-    {
-      "cardId": 5,
-      "rating": 1,
-      "reviewedAt": 1772966506524,
-      "interval": 1,
-      "id": 5
-    },
-    {
-      "cardId": 6,
-      "rating": 0,
-      "reviewedAt": 1772966512993,
-      "interval": 1,
-      "id": 6
-    },
-    {
-      "cardId": 7,
-      "rating": 0,
-      "reviewedAt": 1772966519490,
-      "interval": 1,
-      "id": 7
-    },
-    {
-      "cardId": 8,
-      "rating": 3,
-      "reviewedAt": 1772966524344,
-      "interval": 1,
-      "id": 8
-    },
-    {
-      "cardId": 9,
-      "rating": 3,
-      "reviewedAt": 1772966525939,
-      "interval": 1,
-      "id": 9
-    },
-    {
-      "cardId": 10,
-      "rating": 3,
-      "reviewedAt": 1772966529897,
-      "interval": 1,
-      "id": 10
-    },
-    {
-      "cardId": 11,
-      "rating": 0,
-      "reviewedAt": 1772966533775,
-      "interval": 1,
-      "id": 11
-    },
-    {
-      "cardId": 12,
-      "rating": 0,
-      "reviewedAt": 1772966537893,
-      "interval": 1,
-      "id": 12
-    },
-    {
-      "cardId": 13,
-      "rating": 0,
-      "reviewedAt": 1772966542224,
-      "interval": 1,
-      "id": 13
-    },
-    {
-      "cardId": 14,
-      "rating": 3,
-      "reviewedAt": 1772966544195,
-      "interval": 1,
-      "id": 14
-    },
-    {
-      "cardId": 15,
-      "rating": 3,
-      "reviewedAt": 1772966552174,
-      "interval": 1,
-      "id": 15
-    },
-    {
-      "cardId": 16,
-      "rating": 3,
-      "reviewedAt": 1772966560309,
-      "interval": 1,
-      "id": 16
-    },
-    {
-      "cardId": 17,
-      "rating": 3,
-      "reviewedAt": 1772966563476,
-      "interval": 1,
-      "id": 17
-    },
-    {
-      "cardId": 18,
-      "rating": 3,
-      "reviewedAt": 1772966572794,
-      "interval": 1,
-      "id": 18
-    },
-    {
-      "cardId": 19,
-      "rating": 0,
-      "reviewedAt": 1772966578326,
-      "interval": 1,
-      "id": 19
-    },
-    {
-      "cardId": 6,
-      "rating": 3,
-      "reviewedAt": 1772966581848,
-      "interval": 1,
-      "id": 20
-    },
-    {
-      "cardId": 7,
-      "rating": 1,
-      "reviewedAt": 1772966592111,
-      "interval": 1,
-      "id": 21
-    },
-    {
-      "cardId": 11,
-      "rating": 3,
-      "reviewedAt": 1772966595828,
-      "interval": 1,
-      "id": 22
-    },
-    {
-      "cardId": 12,
-      "rating": 0,
-      "reviewedAt": 1772966603045,
-      "interval": 1,
-      "id": 23
-    },
-    {
-      "cardId": 13,
-      "rating": 1,
-      "reviewedAt": 1772966607230,
-      "interval": 1,
-      "id": 24
-    },
-    {
-      "cardId": 19,
-      "rating": 0,
-      "reviewedAt": 1772966612031,
-      "interval": 1,
-      "id": 25
-    },
-    {
-      "cardId": 12,
-      "rating": 2,
-      "reviewedAt": 1772966617884,
-      "interval": 1,
-      "id": 26
-    },
-    {
-      "cardId": 19,
-      "rating": 1,
-      "reviewedAt": 1772966626249,
-      "interval": 1,
-      "id": 27
     }
   ],
-  "exportedAt": 1772967698950,
+  "exportedAt": 1772970016308,
   "version": 2
 }
