@@ -243,10 +243,10 @@
       "deckId": 1,
       "front": "wir fahren",
       "back": "je dschemme",
-      "interval": 0,
+      "interval": 1,
       "repetition": 0,
-      "easeFactor": 2.5,
-      "dueDate": "2026-03-08",
+      "easeFactor": 2.36,
+      "dueDate": "2026-03-09",
       "state": "new",
       "createdAt": 1772978136811,
       "id": 20
@@ -574,8 +574,15 @@
       "reviewedAt": 1772978868809,
       "interval": 1,
       "id": 46
+    },
+    {
+      "cardId": 20,
+      "rating": 1,
+      "reviewedAt": 1772996034616,
+      "interval": 1,
+      "id": 47
     }
   ],
-  "exportedAt": 1772978868879,
+  "exportedAt": 1772996034636,
   "version": 2
 }
