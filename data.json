@@ -223,7 +223,8 @@
       "dueDate": "2026-03-09",
       "state": "new",
       "createdAt": 1772966452962,
-      "id": 18
+      "id": 18,
+      "pinned": true
     },
     {
       "deckId": 1,
@@ -542,6 +543,6 @@
       "id": 43
     }
   ],
-  "exportedAt": 1772970243218,
+  "exportedAt": 1772970543294,
   "version": 2
 }
