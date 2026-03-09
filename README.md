@@ -1,85 +1,105 @@
 # FlashForge ⚡
 
-Anki-ähnliche Karteikarten-PWA — komplett offline, kein Build-Step, kein Server nötig.
+Karteikarten-App fürs iPhone — offline, installierbar, Anki-kompatibel.
 
-## Lokal testen
+---
 
-```bash
-cd anki-pwa
-python3 -m http.server 8080
-# Dann: http://localhost:8080
-```
+## Quickstart
 
-Oder mit Node.js:
-```bash
-npx serve .
-```
+### 1. App öffnen & installieren
 
-> **Wichtig:** Direkt als `file://` öffnen funktioniert nicht (Service Worker braucht HTTP/HTTPS).
+1. **[flashforge öffnen](https://bogardinio.github.io/flashforge/)** — in Safari auf dem iPhone (kein Chrome, kein Firefox)
+2. Teilen-Button antippen → **„Zum Home-Bildschirm"** → Hinzufügen
 
-## Auf GitHub Pages deployen
+Die App startet danach wie eine native App, funktioniert vollständig offline.
 
-1. Repository erstellen (z.B. `flashforge`)
-2. Den Inhalt des `anki-pwa/`-Ordners in den Repository-Root pushen
-3. Einstellungen → Pages → Branch: `main`, Ordner: `/` (root)
-4. Die App ist dann unter `https://DEINNAME.github.io/flashforge/` erreichbar
+---
 
-```bash
-git init
-git add .
-git commit -m "Initial FlashForge"
-git branch -M main
-git remote add origin https://github.com/DEINNAME/flashforge.git
-git push -u origin main
-```
+### 2. Eigene Karten anlegen
 
-## Auf dem iPhone installieren
+**Variante A — CSV manuell pflegen (empfohlen für Einsteiger)**
 
-1. Die App-URL in **Safari** öffnen (kein Chrome, kein Firefox!)
-2. Teilen-Button (Rechteck mit Pfeil nach oben) tippen
-3. **„Zum Home-Bildschirm"** auswählen
-4. Name bestätigen → **Hinzufügen**
+Erstelle eine CSV-Datei mit deinen Vokabeln — semikolon- oder tab-getrennt:
 
-Die App startet dann wie eine native App ohne Browser-UI.
-
-## CSV importieren
-
-### Aus Anki Desktop exportieren
-1. Anki Desktop → Datei → Exportieren
-2. Format: **„Notizen im Klartext (.txt)"**
-3. Häkchen setzen: „Tags einschließen" (optional)
-4. Exportierte `.txt`-Datei in FlashForge importieren
-
-### Eigene CSV erstellen
-Semikolon-getrennt mit optionalen Anführungszeichen:
 ```
 "Guten Tag.";"Dzień dobry."
 "Danke.";"Dziękuję."
+"Wie geht's?";"Jak się masz?"
 ```
-Oder Tab-getrennt (z.B. aus Excel mit „Als TSV speichern").
 
-### Wieder in Anki importieren
-1. Anki Desktop → Datei → Importieren → CSV-Datei wählen
-2. Trennzeichen: **Semikolon**
-3. Erstes Feld = Vorderseite, Zweites Feld = Rückseite
+Speichere die Datei z.B. in der **iCloud** (Ordner „Dateien") oder direkt im iPhone-Speicher.
 
-## Datei-Struktur
+In der App: **Deck importieren → CSV-Datei wählen**
 
-```
-anki-pwa/
-├── index.html    # Komplette App (HTML + CSS + JS inline)
-├── sw.js         # Service Worker für Offline-Caching
-├── manifest.json # PWA-Manifest
-├── icon.svg      # App-Icon
-└── README.md     # Diese Datei
-```
+Den Lernfortschritt speichert die App automatisch lokal auf dem Gerät.
+
+> **Tipp:** Jederzeit neue Karten ergänzen und die CSV neu importieren — bereits gelernte Karten behalten ihren Fortschritt.
+
+**Variante B — Aus Anki Desktop exportieren**
+
+1. Anki Desktop → Datei → Exportieren
+2. Format: **„Notizen im Klartext (.txt)"**
+3. Exportierte Datei in FlashForge importieren
+
+---
 
 ## Funktionen
 
-- **SM-2 Algorithmus** (wie Anki) — Again / Schwer / Gut / Leicht
+- **SM-2 Algorithmus** — Again / Schwer / Gut / Leicht (wie Anki)
 - **CSV-Import** — Anki-Export (.txt), Semikolon-CSV, Tab-CSV
-- **JSON-Backup** — Vollständiger Export/Import mit Lernfortschritt
-- **CSV-Export** — Anki-kompatibel (Semikolon-getrennt)
 - **Statistiken** — Streak, Aktivitäts-Heatmap, Karten-Verteilung
-- **Offline-First** — IndexedDB + Service Worker
+- **Markierte Karten** — zum gezielten Wiederholen
+- **Offline-First** — IndexedDB + Service Worker, kein Internet nötig
 - **Dark Mode** — OLED-optimiert
+
+---
+
+## Fortgeschritten: Lernfortschritt in eigenem GitHub speichern
+
+Standardmäßig liegt dein Lernfortschritt nur lokal auf dem Gerät. Wer ihn sichern oder geräteübergreifend nutzen möchte, kann ihn in einem **privaten GitHub-Repository** speichern.
+
+### Was du brauchst
+
+- Ein GitHub-Account
+- Ein privates Repository (z.B. `meine-lernkarten`)
+- Einen Fine-Grained Personal Access Token (PAT)
+
+---
+
+### Schritt 1 — Privates Repository anlegen
+
+1. [github.com/new](https://github.com/new) öffnen
+2. Name vergeben (z.B. `meine-lernkarten`)
+3. **Private** auswählen → Repository erstellen
+
+---
+
+### Schritt 2 — Fine-Grained PAT erstellen
+
+1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
+2. **Generate new token** klicken
+3. Einstellungen:
+   - **Token name:** z.B. `FlashForge`
+   - **Expiration:** nach Bedarf (z.B. 1 Jahr)
+   - **Repository access:** „Only select repositories" → dein privates Repo auswählen
+4. Unter **Permissions → Repository permissions:**
+   - **Contents:** `Read and write`
+   - Alles andere bleibt `No access`
+5. **Generate token** → Token kopieren (wird nur einmal angezeigt!)
+
+---
+
+### Schritt 3 — In FlashForge einrichten
+
+In der App: **Einstellungen → GitHub-Sync**
+
+| Feld | Wert |
+|------|------|
+| GitHub Owner | dein GitHub-Benutzername |
+| Repository | Name deines privaten Repos |
+| Dateiname | z.B. `data.json` |
+| Token | der PAT aus Schritt 2 |
+
+Speichern → **Jetzt synchronisieren**
+
+Die App legt `data.json` automatisch im Repository an und synchronisiert ab sofort deinen Lernfortschritt.
