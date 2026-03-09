@@ -628,7 +628,10 @@
     }
 
     /* Hidden file input */
-    #file-input, #json-file-input { display: none; }
+    #file-input, #json-file-input {
+      position: fixed; top: -100px; left: -100px;
+      width: 1px; height: 1px; opacity: 0; pointer-events: none;
+    }
 
     /* Section spacing */
     .section { margin-bottom: 16px; }
@@ -1464,7 +1467,7 @@ async function renderHome() {
         <button class="deck-cta btn-study-deck" style="flex:1;margin-top:0;">
           ${allDue > 0 ? `▶ Lernen (${allDue})` : '↺ Alles wiederholen'}
         </button>
-        ${pinned > 0 ? `<button class="deck-cta btn-pinned-study" style="flex:0 0 auto;margin-top:0;padding:12px 14px;background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.3);" title="Nur markierte Karten lernen">⭐ Markierte</button>` : ''}
+        ${pinned > 0 ? `<button class="deck-cta btn-pinned-study" style="flex:0 0 auto;margin-top:0;padding:8px 10px;background:rgba(251,191,36,.15);color:#fcd34d;border:1px solid rgba(251,191,36,.3);" title="Nur markierte Karten lernen">⭐ Markierte</button>` : ''}
       </div>`;
 
     card.querySelector('.btn-study-deck').addEventListener('click', e => {
@@ -1917,7 +1920,9 @@ async function ghSyncUp(silent = false) {
     await db.setSetting('lastGHSync', Date.now());
     if (!silent) showToast('Auf GitHub gespeichert');
   } catch (err) {
-    if (!silent) showToast('Upload fehlgeschlagen: ' + err.message);
+    const isSplitBrain = err.message && err.message.includes('does not match');
+    const hint = isSplitBrain ? ' — Neuere Version auf GitHub vorhanden. Bitte erst "Von GitHub laden".' : '';
+    if (!silent) showToast('Upload fehlgeschlagen: ' + err.message + hint);
     console.error(err);
   }
   if (!silent) closeBackupModal();
@@ -2167,7 +2172,7 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 5000);
 }
 
 // ════════════════════════════════════════════════════════════
