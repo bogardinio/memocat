@@ -96,10 +96,10 @@
       "front": "Wie heißt du? (informell)",
       "back": "Jak się nazywasz? (jak sche nasywasz?)",
       "interval": 1,
-      "repetition": 0,
+      "repetition": 1,
       "easeFactor": 2.56,
-      "dueDate": "2026-03-09",
-      "state": "new",
+      "dueDate": "2026-03-10",
+      "state": "learning",
       "createdAt": 1772966452962,
       "id": 8,
       "pinned": true
@@ -146,8 +146,8 @@
       "back": "Dzień dobry (dschenj dobry)",
       "interval": 1,
       "repetition": 0,
-      "easeFactor": 1.64,
-      "dueDate": "2026-03-09",
+      "easeFactor": 1.5,
+      "dueDate": "2026-03-10",
       "state": "new",
       "createdAt": 1772966452962,
       "id": 12,
@@ -159,8 +159,8 @@
       "back": "Dobry wieczór (dobry wjetschur)",
       "interval": 1,
       "repetition": 0,
-      "easeFactor": 1.9,
-      "dueDate": "2026-03-09",
+      "easeFactor": 1.76,
+      "dueDate": "2026-03-10",
       "state": "new",
       "createdAt": 1772966452962,
       "id": 13
@@ -196,8 +196,8 @@
       "back": "Jak leci? (jak letzi?)",
       "interval": 1,
       "repetition": 0,
-      "easeFactor": 2.38,
-      "dueDate": "2026-03-09",
+      "easeFactor": 1.6,
+      "dueDate": "2026-03-10",
       "state": "new",
       "createdAt": 1772966452962,
       "id": 16,
@@ -221,8 +221,8 @@
       "back": "A u ciebie? (a u tschebje?)",
       "interval": 1,
       "repetition": 0,
-      "easeFactor": 1.64,
-      "dueDate": "2026-03-09",
+      "easeFactor": 1.3,
+      "dueDate": "2026-03-10",
       "state": "new",
       "createdAt": 1772966452962,
       "id": 18,
@@ -234,8 +234,8 @@
       "back": "Nie narzekam (nje naschekam)",
       "interval": 1,
       "repetition": 0,
-      "easeFactor": 1.58,
-      "dueDate": "2026-03-09",
+      "easeFactor": 1.3,
+      "dueDate": "2026-03-10",
       "state": "new",
       "createdAt": 1772966452962,
       "id": 19,
@@ -247,8 +247,8 @@
       "back": "je dschemme",
       "interval": 1,
       "repetition": 0,
-      "easeFactor": 2.04,
-      "dueDate": "2026-03-09",
+      "easeFactor": 1.58,
+      "dueDate": "2026-03-10",
       "state": "new",
       "createdAt": 1772978136811,
       "id": 20
@@ -779,8 +779,99 @@
       "reviewedAt": 1773031512689,
       "interval": 1,
       "id": 83
+    },
+    {
+      "cardId": 8,
+      "rating": 2,
+      "reviewedAt": 1773031541391,
+      "interval": 1,
+      "id": 84
+    },
+    {
+      "cardId": 12,
+      "rating": 1,
+      "reviewedAt": 1773031553578,
+      "interval": 1,
+      "id": 85
+    },
+    {
+      "cardId": 13,
+      "rating": 1,
+      "reviewedAt": 1773031563526,
+      "interval": 1,
+      "id": 86
+    },
+    {
+      "cardId": 16,
+      "rating": 0,
+      "reviewedAt": 1773031594698,
+      "interval": 1,
+      "id": 87
+    },
+    {
+      "cardId": 18,
+      "rating": 0,
+      "reviewedAt": 1773031604383,
+      "interval": 1,
+      "id": 88
+    },
+    {
+      "cardId": 19,
+      "rating": 0,
+      "reviewedAt": 1773031622034,
+      "interval": 1,
+      "id": 89
+    },
+    {
+      "cardId": 20,
+      "rating": 0,
+      "reviewedAt": 1773031627651,
+      "interval": 1,
+      "id": 90
+    },
+    {
+      "cardId": 16,
+      "rating": 0,
+      "reviewedAt": 1773031633154,
+      "interval": 1,
+      "id": 91
+    },
+    {
+      "cardId": 18,
+      "rating": 0,
+      "reviewedAt": 1773031640187,
+      "interval": 1,
+      "id": 92
+    },
+    {
+      "cardId": 19,
+      "rating": 1,
+      "reviewedAt": 1773031644386,
+      "interval": 1,
+      "id": 93
+    },
+    {
+      "cardId": 20,
+      "rating": 1,
+      "reviewedAt": 1773031647334,
+      "interval": 1,
+      "id": 94
+    },
+    {
+      "cardId": 16,
+      "rating": 1,
+      "reviewedAt": 1773031652619,
+      "interval": 1,
+      "id": 95
+    },
+    {
+      "cardId": 18,
+      "rating": 1,
+      "reviewedAt": 1773031658784,
+      "interval": 1,
+      "id": 96
     }
   ],
-  "exportedAt": 1773031540430,
+  "exportedAt": 1773031659202,
   "version": 2
 }
