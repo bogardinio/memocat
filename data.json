@@ -256,14 +256,15 @@
     {
       "deckId": 1,
       "front": "alles klar - dann erstmal!",
-      "back": "narasche (eselsbrücke - garage)",
+      "back": "narasche (eselsbrücke - garage)\ncool kids sagen: nara",
       "interval": 0,
       "repetition": 0,
       "easeFactor": 2.5,
       "dueDate": "2026-03-09",
       "state": "new",
       "createdAt": 1773048708151,
-      "id": 21
+      "id": 21,
+      "pinned": true
     }
   ],
   "reviewLog": [
@@ -884,6 +885,6 @@
       "id": 96
     }
   ],
-  "exportedAt": 1773048732508,
+  "exportedAt": 1773048811584,
   "version": 2
 }
