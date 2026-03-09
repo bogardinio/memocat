@@ -299,11 +299,11 @@
       "deckId": 2,
       "front": "Wie war die Reise?",
       "back": "Jak minęła podróż? (jak minewa podrusch?)",
-      "interval": 1,
-      "repetition": 1,
-      "easeFactor": 2.5,
-      "dueDate": "2026-03-10",
-      "state": "learning",
+      "interval": 8,
+      "repetition": 2,
+      "easeFactor": 2.6,
+      "dueDate": "2026-03-17",
+      "state": "review",
       "createdAt": 1773068169760,
       "id": 24,
       "pinned": true
@@ -979,8 +979,15 @@
       "reviewedAt": 1773069472974,
       "interval": 6,
       "id": 102
+    },
+    {
+      "cardId": 24,
+      "rating": 3,
+      "reviewedAt": 1773069712518,
+      "interval": 8,
+      "id": 103
     }
   ],
-  "exportedAt": 1773069475422,
+  "exportedAt": 1773069713003,
   "version": 2
 }
