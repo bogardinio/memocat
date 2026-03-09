@@ -265,6 +265,18 @@
       "createdAt": 1773048708151,
       "id": 21,
       "pinned": true
+    },
+    {
+      "deckId": 1,
+      "front": "Arzt",
+      "back": "lekasch (Eselsbrücke leck-Arsch)",
+      "interval": 0,
+      "repetition": 0,
+      "easeFactor": 2.5,
+      "dueDate": "2026-03-09",
+      "state": "new",
+      "createdAt": 1773049358336,
+      "id": 22
     }
   ],
   "reviewLog": [
@@ -885,6 +897,6 @@
       "id": 96
     }
   ],
-  "exportedAt": 1773048811584,
+  "exportedAt": 1773049377825,
   "version": 2
 }
