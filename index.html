@@ -445,6 +445,7 @@
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
       margin-bottom: 16px;
+      position: relative;
     }
     .import-drop-zone:hover,
     .import-drop-zone.drag-over {
@@ -627,10 +628,15 @@
       cursor: pointer;
     }
 
-    /* Hidden file input */
-    #file-input, #json-file-input {
+    /* Hidden file input — overlay direkt über Drop-Zone (iOS PWA Fix) */
+    #file-input {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+    }
+    #json-file-input {
       position: fixed; top: -100px; left: -100px;
-      width: 1px; height: 1px; opacity: 0; pointer-events: none;
+      width: 1px; height: 1px; opacity: 0;
     }
 
     /* Section spacing */
@@ -962,6 +968,7 @@
     <div class="content">
       <!-- Drop zone / file picker -->
       <div class="import-drop-zone" id="import-drop-zone" role="button" aria-label="Datei auswählen">
+        <input type="file" id="file-input" accept=".txt,.csv,.tsv" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
           <polyline points="17 8 12 3 7 8"/>
@@ -1047,6 +1054,11 @@
         GitHub einrichten
       </button>
 
+      <div style="border-top:1px solid var(--border);margin:12px 0 10px;"></div>
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px;">Sync-Log</div>
+      <div id="sync-log-area" style="font-size:11px;font-family:monospace;max-height:120px;overflow-y:auto;background:var(--bg);border-radius:8px;padding:8px;margin-bottom:8px;color:var(--text-muted);">—</div>
+      <button class="modal-btn" id="btn-copy-log" style="font-size:13px;padding:8px;">Log kopieren</button>
+
       <button class="modal-cancel" id="btn-backup-cancel">Abbrechen</button>
     </div>
   </div>
@@ -1095,7 +1107,6 @@
   </div>
 
   <!-- Hidden file inputs -->
-  <input type="file" id="file-input" accept=".txt,.csv,.tsv" aria-hidden="true">
   <input type="file" id="json-file-input" accept=".json" aria-hidden="true">
 
   <!-- Toast notification -->
@@ -1893,12 +1904,14 @@ async function ghSyncDown() {
   if (!s || !s.pat) { closeBackupModal(); openGHModal(); return; }
   showToast('Lade von GitHub…');
   try {
-    const { data } = await ghGet(s);
+    const { sha, data } = await ghGet(s);
     await db.importAll(data);
     await db.setSetting('lastGHSync', Date.now());
+    await addSyncLog({ ts: Date.now(), dir: 'DOWN', sha, ok: true });
     showToast('Von GitHub geladen');
     renderHome();
   } catch (err) {
+    await addSyncLog({ ts: Date.now(), dir: 'DOWN', sha: null, ok: false, err: err.message });
     showToast('Download fehlgeschlagen: ' + err.message);
     console.error(err);
   }
@@ -1918,8 +1931,10 @@ async function ghSyncUp(silent = false) {
     const data = await db.exportAll();
     await ghPut(s, data, sha);
     await db.setSetting('lastGHSync', Date.now());
+    await addSyncLog({ ts: Date.now(), dir: 'UP', sha: sha || null, ok: true });
     if (!silent) showToast('Auf GitHub gespeichert');
   } catch (err) {
+    await addSyncLog({ ts: Date.now(), dir: 'UP', sha: null, ok: false, err: err.message });
     const isSplitBrain = err.message && err.message.includes('does not match');
     const hint = isSplitBrain ? ' — Neuere Version auf GitHub vorhanden. Bitte erst "Von GitHub laden".' : '';
     if (!silent) showToast('Upload fehlgeschlagen: ' + err.message + hint);
@@ -2015,7 +2030,34 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function openBackupModal()  { document.getElementById('backup-modal').classList.add('open'); }
+async function addSyncLog(entry) {
+  try {
+    const log = (await db.getSetting('syncLog')) || [];
+    log.unshift(entry);
+    if (log.length > 20) log.length = 20;
+    await db.setSetting('syncLog', log);
+  } catch(e) { console.warn('syncLog write failed', e); }
+}
+
+async function renderSyncLog() {
+  const area = document.getElementById('sync-log-area');
+  const log = (await db.getSetting('syncLog')) || [];
+  if (!log.length) { area.textContent = 'Noch keine Einträge.'; return; }
+  area.innerHTML = log.map(e => {
+    const d = new Date(e.ts);
+    const time = d.toLocaleDateString('de', {day:'2-digit',month:'2-digit'})
+               + ' ' + d.toLocaleTimeString('de', {hour:'2-digit',minute:'2-digit'});
+    const sha  = e.sha ? ` SHA=${e.sha.slice(0,7)}` : '';
+    const info = e.ok ? ' → OK' : ` → ${e.err || '?'}`;
+    const col  = e.ok ? 'var(--good)' : 'var(--again)';
+    return `<div style="color:${col};margin-bottom:2px;">${e.ok?'✓':'✗'} ${time} ${e.dir}${sha}${info}</div>`;
+  }).join('');
+}
+
+function openBackupModal() {
+  document.getElementById('backup-modal').classList.add('open');
+  renderSyncLog();
+}
 function closeBackupModal() { document.getElementById('backup-modal').classList.remove('open'); }
 
 // ════════════════════════════════════════════════════════════
@@ -2262,11 +2304,9 @@ function wireEvents() {
   // Done screen
   document.getElementById('btn-done-home').addEventListener('click', () => navigate('home'));
 
-  // Import: file picker trigger
+  // Import: file picker — input liegt direkt über der Drop-Zone, kein .click() nötig
   const dropZone = document.getElementById('import-drop-zone');
   const fileInput = document.getElementById('file-input');
-  dropZone.addEventListener('click', () => fileInput.click());
-  dropZone.addEventListener('touchstart', e => { e.preventDefault(); fileInput.click(); }, { passive: false });
 
   // Drag & drop (desktop convenience)
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
@@ -2293,6 +2333,19 @@ function wireEvents() {
   document.getElementById('btn-backup-cancel').addEventListener('click', closeBackupModal);
   document.getElementById('backup-modal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeBackupModal();
+  });
+
+  // Sync-Log kopieren
+  document.getElementById('btn-copy-log').addEventListener('click', async () => {
+    const log = (await db.getSetting('syncLog')) || [];
+    const text = log.map(e => {
+      const d = new Date(e.ts);
+      const time = d.toISOString().slice(0,16).replace('T',' ');
+      const sha  = e.sha ? ` SHA=${e.sha.slice(0,7)}` : '';
+      return `${e.ok?'OK  ':'FAIL'} ${time} ${e.dir}${sha}${e.ok ? '' : ' → '+e.err}`;
+    }).join('\n');
+    await navigator.clipboard.writeText(text || '(leer)');
+    showToast('Log kopiert');
   });
 
   // GitHub sync
