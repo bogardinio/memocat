@@ -2036,6 +2036,7 @@ function saveGHSettingsForm() {
   saveGHSettings({ owner, repo, path, pat });
   closeGHModal();
   showToast('GitHub-Einstellungen gespeichert');
+  document.getElementById('backup-banner').classList.remove('show');
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2096,10 +2097,19 @@ async function addSyncLog(entry) {
   } catch(e) { console.warn('syncLog write failed', e); }
 }
 
+let _syncLogText = '';  // gecacht für synchronen iOS-Clipboard-Zugriff
+
 async function renderSyncLog() {
   const area = document.getElementById('sync-log-area');
   const log = (await db.getSetting('syncLog')) || [];
-  if (!log.length) { area.textContent = 'Noch keine Einträge.'; return; }
+  if (!log.length) { area.textContent = 'Noch keine Einträge.'; _syncLogText = ''; return; }
+  // Plaintext für Clipboard vorhalten
+  _syncLogText = log.map(e => {
+    const d = new Date(e.ts);
+    const time = d.toISOString().slice(0,16).replace('T',' ');
+    const sha  = e.sha ? ` SHA=${e.sha.slice(0,7)}` : '';
+    return `${e.ok?'OK  ':'FAIL'} ${time} ${e.dir}${sha}${e.ok ? '' : ' → '+e.err}`;
+  }).join('\n');
   area.innerHTML = log.map(e => {
     const d = new Date(e.ts);
     const time = d.toLocaleDateString('de', {day:'2-digit',month:'2-digit'})
@@ -2395,28 +2405,19 @@ function wireEvents() {
   });
 
   // Sync-Log kopieren
-  document.getElementById('btn-copy-log').addEventListener('click', async () => {
-    const log = (await db.getSetting('syncLog')) || [];
-    const text = log.map(e => {
-      const d = new Date(e.ts);
-      const time = d.toISOString().slice(0,16).replace('T',' ');
-      const sha  = e.sha ? ` SHA=${e.sha.slice(0,7)}` : '';
-      return `${e.ok?'OK  ':'FAIL'} ${time} ${e.dir}${sha}${e.ok ? '' : ' → '+e.err}`;
-    }).join('\n');
-    const content = text || '(leer)';
-    // navigator.clipboard schlägt auf iOS Safari oft lautlos fehl → execCommand-Fallback
-    try {
-      await navigator.clipboard.writeText(content);
-    } catch {
-      const ta = document.createElement('textarea');
-      ta.value = content;
-      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    }
+  document.getElementById('btn-copy-log').addEventListener('click', () => {
+    // Synchron — iOS Safari verliert den User-Gesture-Kontext bei await
+    const content = _syncLogText || '(leer)';
+    const ta = document.createElement('textarea');
+    ta.value = content;
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    // Modernes API zusätzlich versuchen (Desktop/Android)
+    navigator.clipboard?.writeText(content).catch(() => {});
     showToast('Log kopiert');
   });
 
