@@ -603,6 +603,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
+
     /* ── Backup Reminder Banner ── */
     .backup-banner {
       background: rgba(124,58,237,.15);
@@ -734,7 +735,8 @@
     </div>
 
     <div class="content" id="home-content">
-      <!-- Backup reminder (hidden by default) -->
+
+      <!-- Backup reminder (nur ohne GitHub-Sync, hidden by default) -->
       <div class="backup-banner" id="backup-banner">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;color:var(--accent-l)">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -1293,23 +1295,27 @@ function sm2(card, rating) {
     : 0;
 
   if (c.repetition === 0) {
-    // ── Lernphase (learning.rs) ──────────────────────────────
+    // ── Lernphase / Relearn-Phase (learning.rs + relearning.rs) ─────────
+    const isRelearn = (c.lapses || 0) > 0;
     if (rating === 0 || rating === 1) {
-      // Again / Hard: bleibt in Lernphase
+      // Again / Hard: bleibt in Lern-/Relearn-Phase
       c.interval = 1;
       // repetition bleibt 0
     } else if (rating === 2) {
       // Good: graduiert mit graduating_interval_good = 1 Tag
+      // (Relearn: scheduled_days nach Lapse = 1, identisch)
       c.interval   = 1;
       c.repetition = 1;
       // EF nur bei echter Erstgraduierung zurücksetzen (Anki: initial_ease_factor)
       // Bei Relearn (lapses > 0) bleibt EF erhalten
-      if (!c.lapses) c.easeFactor = 2.5;
+      if (!isRelearn) c.easeFactor = 2.5;
     } else {
-      // Easy: graduiert mit graduating_interval_easy = 4 Tage
-      c.interval   = 4;
+      // Easy:
+      //   Neue Karte  → graduating_interval_easy = 4 Tage   (learning.rs)
+      //   Relearn     → stored_lapse_interval + 1 = 1+1 = 2 (relearning.rs Zeile 195)
+      c.interval   = isRelearn ? 2 : 4;
       c.repetition = 1;
-      if (!c.lapses) c.easeFactor = 2.5;
+      if (!isRelearn) c.easeFactor = 2.5;
     }
 
   } else {
@@ -1340,8 +1346,11 @@ function sm2(card, rating) {
     c.easeFactor  = Math.max(1.3, Math.round((c.easeFactor + efDelta) * 1000) / 1000);
   }
 
-  // State label
-  c.state = c.repetition === 0 ? 'new' : (c.interval < 7 ? 'learning' : 'review');
+  // State label (4 Zustände wie Anki: new, learning, review, relearn)
+  // relearn = repetition===0 und lapses>0 (Karte war schon in Review, dann vergessen)
+  c.state = c.repetition === 0
+    ? ((c.lapses || 0) > 0 ? 'relearn' : 'new')
+    : (c.interval < 7 ? 'learning' : 'review');
 
   // Next due date
   const due = new Date();
@@ -1457,17 +1466,18 @@ async function renderHome() {
 
   // Summary bar
   const dueTotal = allCards.filter(c => c.dueDate <= today).length;
-  const newTotal = allCards.filter(c => c.state === 'new' || c.repetition === 0).length;
+  const newTotal = allCards.filter(c => (c.state === 'new') || (c.repetition === 0 && !(c.lapses || 0))).length;
   document.getElementById('today-learned').textContent = todayLogs.length;
   document.getElementById('today-due').textContent     = dueTotal;
   document.getElementById('today-new').textContent     = newTotal;
 
-  // Backup reminder
-  const lastBackup = await db.getSetting('lastBackupDate');
-  const daysSince  = lastBackup
-    ? Math.floor((Date.now() - lastBackup) / 86400000)
-    : 999;
-  document.getElementById('backup-banner').classList.toggle('show', daysSince >= 7 && allCards.length > 0);
+  // Backup reminder — nur anzeigen wenn kein GitHub-Sync konfiguriert ist
+  const ghConfigured = !!(getGHSettings()?.pat);
+  if (!ghConfigured) {
+    const lastBackup = await db.getSetting('lastBackupDate');
+    const daysSince  = lastBackup ? Math.floor((Date.now() - lastBackup) / 86400000) : 999;
+    document.getElementById('backup-banner').classList.toggle('show', daysSince >= 7 && allCards.length > 0);
+  }
 
   // Deck list
   const list = document.getElementById('deck-list');
@@ -1487,7 +1497,7 @@ async function renderHome() {
   for (const deck of decks) {
     const cards      = allCards.filter(c => c.deckId === deck.id);
     const dueList    = cards.filter(c => c.dueDate <= today);
-    const newList    = cards.filter(c => c.state === 'new' || c.repetition === 0);
+    const newList    = cards.filter(c => (c.state === 'new') || (c.repetition === 0 && !(c.lapses || 0)));
     const pinnedList = cards.filter(c => c.pinned);
     const due        = dueList.length;
     const newC       = newList.filter(c => c.dueDate <= today).length;
@@ -1556,10 +1566,12 @@ async function startReview(deckId, deckName, forceAll = false, pinnedOnly = fals
 
   if (queue.length === 0) { showToast('Keine Karten im Deck!'); return; }
 
-  // Shuffle: new cards last, due-oldest first
+  // Sortierung: relearn/learning/review zuerst (älteste zuerst), neue Karten ans Ende
   queue.sort((a, b) => {
-    if (a.state === 'new' && b.state !== 'new') return 1;
-    if (a.state !== 'new' && b.state === 'new') return -1;
+    const aIsNew = a.state === 'new';
+    const bIsNew = b.state === 'new';
+    if (aIsNew && !bIsNew) return 1;
+    if (!aIsNew && bIsNew) return -1;
     return a.dueDate.localeCompare(b.dueDate);
   });
 
@@ -1826,10 +1838,14 @@ async function renderStats() {
   });
   renderHeatmap(activity);
 
-  // State distribution
-  const counts = { new: 0, learning: 0, review: 0 };
+  // State distribution (4 Zustände: new, learning, review, relearn)
+  const counts = { new: 0, learning: 0, review: 0, relearn: 0 };
   allCards.forEach(c => {
-    const s = c.state || (c.repetition === 0 ? 'new' : c.interval < 7 ? 'learning' : 'review');
+    const s = c.state || (
+      c.repetition === 0
+        ? ((c.lapses || 0) > 0 ? 'relearn' : 'new')
+        : (c.interval < 7 ? 'learning' : 'review')
+    );
     if (counts[s] !== undefined) counts[s]++;
   });
   renderStateBars(counts, allCards.length);
@@ -2314,6 +2330,7 @@ function wireEvents() {
   document.getElementById('btn-backup-open').addEventListener('click', openBackupModal);
   document.getElementById('btn-quick-backup').addEventListener('click', exportJSON);
 
+
   // Review: back button
   document.getElementById('btn-review-back').addEventListener('click', () => navigate('home'));
 
@@ -2382,7 +2399,20 @@ function wireEvents() {
       const sha  = e.sha ? ` SHA=${e.sha.slice(0,7)}` : '';
       return `${e.ok?'OK  ':'FAIL'} ${time} ${e.dir}${sha}${e.ok ? '' : ' → '+e.err}`;
     }).join('\n');
-    await navigator.clipboard.writeText(text || '(leer)');
+    const content = text || '(leer)';
+    // navigator.clipboard schlägt auf iOS Safari oft lautlos fehl → execCommand-Fallback
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = content;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
     showToast('Log kopiert');
   });
 
