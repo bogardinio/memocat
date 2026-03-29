@@ -1,5 +1,5 @@
 // FlashForge Service Worker — Cache-First Offline Strategy
-const CACHE = 'flashforge-v11';
+const CACHE = 'flashforge-v12';
 
 // Only local assets — external URLs (fonts) are cached dynamically on first fetch
 const LOCAL_ASSETS = [

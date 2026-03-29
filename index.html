@@ -1293,10 +1293,14 @@ class FlashDB {
   }
 
   // ── Audio ──
-  getAudio(name) { return this._promise(this._store('audio').get(name)); }
-  putAudio(name, blob) { return this._promise(this._store('audio', 'readwrite').put({ name, blob })); }
-  getAllAudioNames() {
-    return this._promise(this._store('audio').getAllKeys());
+  _hasAudioStore() { return this.db.objectStoreNames.contains('audio'); }
+  getAudio(name) {
+    if (!this._hasAudioStore()) return Promise.resolve(null);
+    return this._promise(this._store('audio').get(name));
+  }
+  putAudio(name, file) {
+    if (!this._hasAudioStore()) return Promise.reject(new Error('Audio store missing — bitte App neu laden (alle Tabs schließen)'));
+    return this._promise(this._store('audio', 'readwrite').put({ name, blob: file }));
   }
 
   // ── Backup ──
@@ -1491,7 +1495,7 @@ function splitCSVLine(line, delim) {
 // ════════════════════════════════════════════════════════════
 // APP STATE
 // ════════════════════════════════════════════════════════════
-const APP_VERSION = '1.1.5';
+const APP_VERSION = '1.1.6';
 const db    = new FlashDB();
 const state = {
   // review session
@@ -2571,14 +2575,13 @@ function wireEvents() {
     const f = e.target.files[0];
     if (!f) return;
     try {
-      const blob = new Blob([await f.arrayBuffer()], { type: f.type });
-      await db.putAudio(f.name, blob);
+      await db.putAudio(f.name, f);
       state.importAudioName = f.name;
       document.getElementById('import-audio-status').textContent = `✔ ${f.name} gespeichert`;
       document.getElementById('btn-audio-pick').textContent = '✔ ' + f.name;
     } catch (err) {
       showToast('Audio-Datei konnte nicht gespeichert werden');
-      console.error(err);
+      console.error('Audio save error:', err);
     }
     e.target.value = '';
   });
@@ -2645,8 +2648,7 @@ function wireEvents() {
     const f = e.target.files[0];
     if (!f || !editorDeck) return;
     try {
-      const blob = new Blob([await f.arrayBuffer()], { type: f.type });
-      await db.putAudio(f.name, blob);
+      await db.putAudio(f.name, f);
       // Update all cards in this deck that have audioTimestamps
       const cards = await db.getCards(editorDeck.id);
       for (const card of cards) {
