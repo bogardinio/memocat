@@ -1174,6 +1174,14 @@
         <tbody id="editor-tbody"></tbody>
       </table>
       <button class="editor-add-row" id="btn-editor-add">+ Karte hinzufügen</button>
+      <div id="editor-audio-area" style="margin-top:16px;padding:12px;background:var(--surface-2);border-radius:8px;">
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">🔊 Audio-Datei</div>
+        <div id="editor-audio-status" style="font-size:13px;margin-bottom:8px;"></div>
+        <input type="file" id="editor-audio-input" accept=".mp3,.m4a,.ogg,.wav" style="display:none">
+        <button class="primary-btn" id="btn-editor-audio" style="background:var(--surface);color:var(--text);font-size:14px;padding:8px 14px;">
+          MP3-Datei zuordnen
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1444,6 +1452,9 @@ function parseCSV(text) {
     const back  = fields[1].trim();
     if (!front || !back) continue;
 
+    // Skip header rows (e.g. "Deutsch";"Polnisch";"Audio")
+    if (cards.length === 0 && /^(deutsch|front|vorderseite)/i.test(front)) continue;
+
     // Optional col 3: audio timestamps (e.g. "27.02-31.02|33.02-37.87") or deck name
     const col3 = fields[2] ? fields[2].trim() : null;
     let audioTimestamps = null, deckName = null;
@@ -1480,7 +1491,7 @@ function splitCSVLine(line, delim) {
 // ════════════════════════════════════════════════════════════
 // APP STATE
 // ════════════════════════════════════════════════════════════
-const APP_VERSION = '1.1.4';
+const APP_VERSION = '1.1.5';
 const db    = new FlashDB();
 const state = {
   // review session
@@ -2217,6 +2228,20 @@ async function openDeckEditor(deck) {
   const tbody = document.getElementById('editor-tbody');
   tbody.innerHTML = '';
   cards.forEach(card => addEditorRow(card, tbody));
+
+  // Show current audio file association
+  const audioFile = cards.find(c => c.audioFile)?.audioFile;
+  const statusEl = document.getElementById('editor-audio-status');
+  const btnEl = document.getElementById('btn-editor-audio');
+  if (audioFile) {
+    const exists = await db.getAudio(audioFile);
+    statusEl.textContent = exists ? `✔ ${audioFile}` : `⚠ ${audioFile} (nicht gefunden)`;
+    btnEl.textContent = exists ? 'Andere MP3 wählen' : 'MP3-Datei zuordnen';
+  } else {
+    statusEl.textContent = 'Keine Audio-Datei zugeordnet';
+    btnEl.textContent = 'MP3-Datei zuordnen';
+  }
+
   navigate('editor');
 }
 
@@ -2545,9 +2570,16 @@ function wireEvents() {
   document.getElementById('audio-file-input').addEventListener('change', async e => {
     const f = e.target.files[0];
     if (!f) return;
-    state.importAudioName = f.name;
-    await db.putAudio(f.name, f);
-    document.getElementById('import-audio-status').textContent = `✔ ${f.name} gespeichert`;
+    try {
+      const blob = new Blob([await f.arrayBuffer()], { type: f.type });
+      await db.putAudio(f.name, blob);
+      state.importAudioName = f.name;
+      document.getElementById('import-audio-status').textContent = `✔ ${f.name} gespeichert`;
+      document.getElementById('btn-audio-pick').textContent = '✔ ' + f.name;
+    } catch (err) {
+      showToast('Audio-Datei konnte nicht gespeichert werden');
+      console.error(err);
+    }
     e.target.value = '';
   });
 
@@ -2604,6 +2636,35 @@ function wireEvents() {
   });
   document.getElementById('btn-editor-add').addEventListener('click', addNewEditorCard);
   document.getElementById('editor-deck-name').addEventListener('input', () => setEditorDirty(true));
+
+  // Editor: audio file upload
+  document.getElementById('btn-editor-audio').addEventListener('click', () => {
+    document.getElementById('editor-audio-input').click();
+  });
+  document.getElementById('editor-audio-input').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    if (!f || !editorDeck) return;
+    try {
+      const blob = new Blob([await f.arrayBuffer()], { type: f.type });
+      await db.putAudio(f.name, blob);
+      // Update all cards in this deck that have audioTimestamps
+      const cards = await db.getCards(editorDeck.id);
+      for (const card of cards) {
+        if (card.audioTimestamps) {
+          card.audioFile = f.name;
+          await db.updateCard(card);
+        }
+      }
+      document.getElementById('editor-audio-status').textContent = `✔ ${f.name}`;
+      document.getElementById('btn-editor-audio').textContent = 'Andere MP3 wählen';
+      showToast(`Audio "${f.name}" zugeordnet`);
+    } catch (err) {
+      showToast('Audio konnte nicht gespeichert werden');
+      console.error(err);
+    }
+    e.target.value = '';
+  });
+
   document.getElementById('btn-editor-delete').addEventListener('click', async () => {
     if (!confirm(`Deck "${editorDeck.name}" und alle Karten löschen?`)) return;
     await db.deleteDeck(editorDeck.id);
