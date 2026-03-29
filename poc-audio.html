@@ -9,131 +9,181 @@
   body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 16px; }
   h1 { font-size: 18px; margin-bottom: 4px; color: #a78bfa; }
   .info { font-size: 13px; color: #888; margin-bottom: 16px; }
-  .card {
-    background: #22223a; border-radius: 10px; padding: 14px;
-    margin-bottom: 10px; border: 1px solid #333;
-  }
-  .de { font-size: 15px; color: #999; margin-bottom: 4px; }
-  .pl { font-size: 17px; color: #c4b5fd; font-weight: 600; }
-  .reps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .test-section { margin: 16px 0; padding: 14px; background: #22223a; border-radius: 10px; border: 1px solid #333; }
+  .test-title { color: #f59e0b; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
   .play-btn {
     background: #7c3aed; color: #fff; border: none; border-radius: 6px;
-    padding: 8px 14px; font-size: 14px; cursor: pointer;
+    padding: 10px 18px; font-size: 15px; cursor: pointer; margin: 4px 4px 4px 0;
   }
   .play-btn.playing { background: #ef4444; }
-  .test-section { margin: 20px 0; padding: 14px; background: #2a1a3e; border-radius: 10px; }
-  .test-title { color: #f59e0b; font-size: 14px; margin-bottom: 8px; }
-  .log { font-size: 12px; color: #666; margin-top: 8px; font-family: monospace; white-space: pre-wrap; }
+  .play-btn:disabled { opacity: 0.4; }
+  .log { font-size: 12px; color: #888; margin-top: 8px; font-family: monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+  .status { font-size: 13px; padding: 8px; border-radius: 6px; margin-bottom: 12px; }
+  .status.ok { background: #1a3a2a; color: #4ade80; }
+  .status.err { background: #3a1a1a; color: #f87171; }
+  .status.wait { background: #2a2a1a; color: #fbbf24; }
 </style>
 </head>
 <body>
 
-<h1>Audio PoC — iOS Test</h1>
-<p class="info">Testet Audio-Playback auf iOS Safari. MP3 wird direkt als Datei geladen (kein IndexedDB).</p>
+<h1>Audio PoC v3 — iOS Test</h1>
+<p class="info">3 Tests: direkte URL, Blob-URL, SW-intercepted URL</p>
+<div class="status wait" id="sw-status">Service Worker wird registriert...</div>
 
-<!-- DOM audio element — the key for iOS -->
-<audio id="audio" preload="auto" src="test-audio.mp3"></audio>
-
+<!-- Test 1: Direct file URL -->
 <div class="test-section">
-  <div class="test-title">Test 1: Einfacher Play (direkte Datei-URL)</div>
-  <button class="play-btn" id="test-simple">&#9654; Play 27s–31s</button>
-  <div class="log" id="log-simple"></div>
+  <div class="test-title">Test 1: Direkte Datei-URL</div>
+  <p class="info">audio.src = "test-audio.mp3"</p>
+  <audio id="audio1" preload="auto" src="test-audio.mp3"></audio>
+  <button class="play-btn" id="btn-test1">&#9654; Play 27s–31s</button>
+  <div class="log" id="log1"></div>
 </div>
 
+<!-- Test 2: Blob URL from fetch -->
 <div class="test-section">
   <div class="test-title">Test 2: Blob-URL (simuliert IndexedDB)</div>
-  <button class="play-btn" id="test-blob">&#9654; Play 27s–31s (Blob)</button>
-  <div class="log" id="log-blob"></div>
+  <p class="info">audio.src = URL.createObjectURL(blob)</p>
+  <audio id="audio2" preload="auto"></audio>
+  <button class="play-btn" id="btn-test2-load">1. Blob laden</button>
+  <button class="play-btn" id="btn-test2-play" disabled>2. Play 27s–31s</button>
+  <div class="log" id="log2"></div>
 </div>
 
-<div style="margin-top:20px;">
-  <div class="info">Erste 3 Karten aus Chunk 000:</div>
-</div>
-
-<div class="card">
-  <div class="de">Herzlich Willkommen in Polen!</div>
-  <div class="pl">Serdecznie witamy w Polsce!</div>
-  <div class="reps">
-    <button class="play-btn" onclick="play(27.02,31.02)">&#9654; 0:27</button>
-    <button class="play-btn" onclick="play(33.02,37.87)">&#9654; 0:33</button>
-    <button class="play-btn" onclick="play(37.87,39.87)">&#9654; 0:37</button>
-  </div>
-</div>
-
-<div class="card">
-  <div class="de">Wie war die Reise?</div>
-  <div class="pl">Jak minela podroz?</div>
-  <div class="reps">
-    <button class="play-btn" onclick="play(46.80,48.80)">&#9654; 0:46</button>
-    <button class="play-btn" onclick="play(50.80,53.80)">&#9654; 0:50</button>
-    <button class="play-btn" onclick="play(53.80,55.80)">&#9654; 0:53</button>
-  </div>
-</div>
-
-<div class="card">
-  <div class="de">Danke, sehr gut.</div>
-  <div class="pl">Dziekuje, bardzo dobrze.</div>
-  <div class="reps">
-    <button class="play-btn" onclick="play(59.56,63.56)">&#9654; 0:59</button>
-  </div>
+<!-- Test 3: SW-intercepted URL -->
+<div class="test-section">
+  <div class="test-title">Test 3: SW-URL (MP3 in IndexedDB, SW liefert sie als HTTP)</div>
+  <p class="info">audio.src = "./audio/test.mp3" → SW fängt ab → liefert Blob aus DB</p>
+  <audio id="audio3" preload="auto"></audio>
+  <button class="play-btn" id="btn-test3-store">1. MP3 in IndexedDB speichern</button>
+  <button class="play-btn" id="btn-test3-play" disabled>2. Play 27s–31s</button>
+  <div class="log" id="log3"></div>
 </div>
 
 <script>
-const audio = document.getElementById('audio');
-let stopAt = null;
-
-// Stop at end timestamp
-audio.addEventListener('timeupdate', () => {
-  if (stopAt != null && audio.currentTime >= stopAt) {
-    audio.pause();
-    stopAt = null;
-    document.querySelectorAll('.play-btn.playing').forEach(b => b.classList.remove('playing'));
-  }
-});
-
-// Simple play with direct file URL
-function play(start, end) {
-  audio.currentTime = Math.max(0, start - 0.15);
-  stopAt = end;
-  audio.play();
+// Register PoC service worker
+const swStatus = document.getElementById('sw-status');
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./poc-sw.js')
+    .then(reg => {
+      swStatus.textContent = 'Service Worker aktiv';
+      swStatus.className = 'status ok';
+      // Wait for it to activate
+      if (reg.installing || reg.waiting) {
+        const sw = reg.installing || reg.waiting;
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'activated') {
+            swStatus.textContent = 'Service Worker aktiv (neu installiert)';
+          }
+        });
+      }
+    })
+    .catch(err => {
+      swStatus.textContent = 'SW Fehler: ' + err.message;
+      swStatus.className = 'status err';
+    });
+} else {
+  swStatus.textContent = 'Service Worker nicht verfuegbar';
+  swStatus.className = 'status err';
 }
 
-// Test 1: Simple play
-document.getElementById('test-simple').addEventListener('click', function() {
-  const log = document.getElementById('log-simple');
-  log.textContent = 'Trying play()...\n';
-  log.textContent += 'audio.src: ' + audio.src + '\n';
-  log.textContent += 'audio.readyState: ' + audio.readyState + '\n';
-  audio.currentTime = 27.0;
-  stopAt = 31.0;
-  audio.play().then(() => {
-    log.textContent += 'SUCCESS — audio playing\n';
-  }).catch(err => {
-    log.textContent += 'FAILED: ' + err.message + '\n';
+function logTo(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent += msg + '\n';
+}
+
+// ── Test 1: Direct URL ──
+const audio1 = document.getElementById('audio1');
+let stop1 = null;
+audio1.addEventListener('timeupdate', () => {
+  if (stop1 != null && audio1.currentTime >= stop1) { audio1.pause(); stop1 = null; }
+});
+document.getElementById('btn-test1').addEventListener('click', () => {
+  logTo('log1', 'play() readyState=' + audio1.readyState);
+  audio1.currentTime = 27;
+  stop1 = 31;
+  audio1.play()
+    .then(() => logTo('log1', 'OK — playing'))
+    .catch(e => logTo('log1', 'FAIL: ' + e.message));
+});
+
+// ── Test 2: Blob URL ──
+const audio2 = document.getElementById('audio2');
+let stop2 = null;
+audio2.addEventListener('timeupdate', () => {
+  if (stop2 != null && audio2.currentTime >= stop2) { audio2.pause(); stop2 = null; }
+});
+document.getElementById('btn-test2-load').addEventListener('click', async () => {
+  logTo('log2', 'Fetching test-audio.mp3 as blob...');
+  const resp = await fetch('test-audio.mp3');
+  const blob = await resp.blob();
+  logTo('log2', 'Blob: ' + blob.size + ' bytes, type: ' + blob.type);
+  audio2.src = URL.createObjectURL(blob);
+  audio2.load();
+  audio2.addEventListener('canplay', function f() {
+    audio2.removeEventListener('canplay', f);
+    logTo('log2', 'canplay — readyState=' + audio2.readyState);
+    document.getElementById('btn-test2-play').disabled = false;
+  });
+});
+document.getElementById('btn-test2-play').addEventListener('click', () => {
+  logTo('log2', 'play() readyState=' + audio2.readyState);
+  audio2.currentTime = 27;
+  stop2 = 31;
+  audio2.play()
+    .then(() => logTo('log2', 'OK — playing'))
+    .catch(e => logTo('log2', 'FAIL: ' + e.message));
+});
+
+// ── Test 3: SW-intercepted URL ──
+const audio3 = document.getElementById('audio3');
+let stop3 = null;
+audio3.addEventListener('timeupdate', () => {
+  if (stop3 != null && audio3.currentTime >= stop3) { audio3.pause(); stop3 = null; }
+});
+
+// Store MP3 in IndexedDB (same DB the SW reads from)
+document.getElementById('btn-test3-store').addEventListener('click', async () => {
+  logTo('log3', 'Fetching MP3...');
+  const resp = await fetch('test-audio.mp3');
+  const blob = await resp.blob();
+  logTo('log3', 'Blob: ' + blob.size + ' bytes');
+
+  // Store in IndexedDB
+  const db = await new Promise((res, rej) => {
+    const req = indexedDB.open('poc-audio-test', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('audio', { keyPath: 'name' });
+    req.onsuccess = e => res(e.target.result);
+    req.onerror = () => rej(req.error);
+  });
+  await new Promise((res, rej) => {
+    const tx = db.transaction('audio', 'readwrite');
+    tx.objectStore('audio').put({ name: 'test.mp3', blob });
+    tx.oncomplete = res;
+    tx.onerror = () => rej(tx.error);
+  });
+  logTo('log3', 'Gespeichert in IndexedDB als "test.mp3"');
+
+  // Set audio src to SW-intercepted URL
+  audio3.src = './audio/test.mp3';
+  audio3.load();
+  logTo('log3', 'audio.src = "./audio/test.mp3" (SW intercept)');
+  audio3.addEventListener('canplay', function f() {
+    audio3.removeEventListener('canplay', f);
+    logTo('log3', 'canplay — readyState=' + audio3.readyState);
+    document.getElementById('btn-test3-play').disabled = false;
+  });
+  audio3.addEventListener('error', () => {
+    logTo('log3', 'ERROR loading audio — SW evtl. nicht aktiv, Seite neu laden');
   });
 });
 
-// Test 2: Blob URL (simulates IndexedDB scenario)
-document.getElementById('test-blob').addEventListener('click', async function() {
-  const log = document.getElementById('log-blob');
-  log.textContent = 'Fetching MP3 as blob...\n';
-  try {
-    const resp = await fetch('test-audio.mp3');
-    const blob = await resp.blob();
-    log.textContent += 'Blob size: ' + blob.size + ' bytes\n';
-    const url = URL.createObjectURL(blob);
-    audio.src = url;
-    audio.load();
-    log.textContent += 'Blob URL set, calling load()...\n';
-    // Wait for enough data
-    audio.addEventListener('canplay', function onCanPlay() {
-      audio.removeEventListener('canplay', onCanPlay);
-      log.textContent += 'canplay fired, readyState: ' + audio.readyState + '\n';
-      log.textContent += 'NOTE: Now tap the button AGAIN to test play()\n';
-    });
-  } catch (err) {
-    log.textContent += 'ERROR: ' + err.message + '\n';
-  }
+document.getElementById('btn-test3-play').addEventListener('click', () => {
+  logTo('log3', 'play() readyState=' + audio3.readyState);
+  audio3.currentTime = 27;
+  stop3 = 31;
+  audio3.play()
+    .then(() => logTo('log3', 'OK — playing'))
+    .catch(e => logTo('log3', 'FAIL: ' + e.message));
 });
 </script>
 </body>
