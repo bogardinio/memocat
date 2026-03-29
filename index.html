@@ -283,8 +283,15 @@
       text-align: center;
       line-height: 1.4;
       color: var(--text);
+      white-space: pre-line;
     }
     .card-face-back .card-text { font-size: 20px; }
+    .audio-play-btn {
+      margin-top: 12px; padding: 8px 20px; font-size: 20px;
+      background: var(--accent-l); color: #fff; border: none; border-radius: 8px; cursor: pointer;
+    }
+    .audio-play-btn.playing { background: #ef4444; }
+    .audio-play-btn.hidden { display: none; }
     .card-divider {
       width: 40%;
       height: 1px;
@@ -838,6 +845,9 @@
             <hr class="card-divider">
             <div class="card-label">Rückseite</div>
             <div class="card-text" id="card-back-text"></div>
+            <button class="audio-play-btn hidden" id="btn-card-audio" aria-label="Audio abspielen">
+              🔊
+            </button>
           </div>
         </div>
       </div>
@@ -992,6 +1002,16 @@
         <div class="section">
           <div class="import-section-label">Deck-Name</div>
           <input type="text" class="text-input" id="import-deck-name" placeholder="Name des Decks" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </div>
+
+        <!-- Audio file upload (shown only when CSV has timestamps) -->
+        <div id="import-audio-area" style="display:none;">
+          <div class="import-section-label">Audio-Datei (MP3)</div>
+          <input type="file" id="audio-file-input" accept=".mp3,.m4a,.ogg,.wav" style="display:none">
+          <button class="primary-btn" id="btn-audio-pick" style="background:var(--surface-2);color:var(--text);margin-bottom:8px;">
+            🔊 MP3-Datei zuordnen
+          </button>
+          <div id="import-audio-status" style="font-size:13px;color:var(--text-muted);margin-bottom:12px;"></div>
         </div>
 
         <button class="primary-btn" id="btn-confirm-import">Importieren</button>
@@ -1170,7 +1190,7 @@ class FlashDB {
 
   async init() {
     return new Promise((resolve, reject) => {
-      const req = indexedDB.open('flashforge', 2);
+      const req = indexedDB.open('flashforge', 3);
 
       req.onupgradeneeded = e => {
         const db = e.target.result;
@@ -1188,6 +1208,9 @@ class FlashDB {
         }
         if (!db.objectStoreNames.contains('settings')) {
           db.createObjectStore('settings', { keyPath: 'key' });
+        }
+        if (!db.objectStoreNames.contains('audio')) {
+          db.createObjectStore('audio', { keyPath: 'name' });
         }
       };
 
@@ -1259,6 +1282,13 @@ class FlashDB {
   }
   setSetting(key, value) {
     return this._promise(this._store('settings', 'readwrite').put({ key, value }));
+  }
+
+  // ── Audio ──
+  getAudio(name) { return this._promise(this._store('audio').get(name)); }
+  putAudio(name, blob) { return this._promise(this._store('audio', 'readwrite').put({ name, blob })); }
+  getAllAudioNames() {
+    return this._promise(this._store('audio').getAllKeys());
   }
 
   // ── Backup ──
@@ -1382,7 +1412,18 @@ function todayStr() {
 // CSV PARSER
 // ════════════════════════════════════════════════════════════
 function parseCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const raw = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // Join multi-line quoted fields into single logical lines
+  const lines = [];
+  let buf = '';
+  for (const line of raw.split('\n')) {
+    buf = buf ? buf + '\n' + line : line;
+    // Count unescaped quotes — odd means we're still inside a quoted field
+    const quotes = (buf.match(/"/g) || []).length;
+    if (quotes % 2 === 0) { lines.push(buf); buf = ''; }
+  }
+  if (buf) lines.push(buf);
 
   // Auto-detect delimiter from first non-comment line
   const sample = lines.find(l => l.trim() && !l.startsWith('#')) || '';
@@ -1403,9 +1444,15 @@ function parseCSV(text) {
     const back  = fields[1].trim();
     if (!front || !back) continue;
 
-    // Optional col 3 = deck name
-    const deckName = fields[2] ? fields[2].trim() : null;
-    cards.push({ front, back, deckName });
+    // Optional col 3: audio timestamps (e.g. "27.02-31.02|33.02-37.87") or deck name
+    const col3 = fields[2] ? fields[2].trim() : null;
+    let audioTimestamps = null, deckName = null;
+    if (col3 && /^\d+[\d.]*-\d/.test(col3)) {
+      audioTimestamps = col3;
+    } else if (col3) {
+      deckName = col3;
+    }
+    cards.push({ front, back, deckName, audioTimestamps });
   }
   return cards;
 }
@@ -1433,7 +1480,7 @@ function splitCSVLine(line, delim) {
 // ════════════════════════════════════════════════════════════
 // APP STATE
 // ════════════════════════════════════════════════════════════
-const APP_VERSION = '1.1.2';
+const APP_VERSION = '1.1.4';
 const db    = new FlashDB();
 const state = {
   // review session
@@ -1445,7 +1492,8 @@ const state = {
   sessionCorrect: 0,
   sessionAgain:   0,
   // import
-  parsedCards:    [],
+  parsedCards:      [],
+  importAudioName:  null,
 };
 
 // ════════════════════════════════════════════════════════════
@@ -1605,6 +1653,12 @@ function showCard() {
   document.getElementById('card-front-small').textContent = card.front;
   document.getElementById('card-back-text').textContent   = card.back;
 
+  // Audio play button
+  stopCardAudio();
+  _audioRepIdx = 0;
+  const audioBtn = document.getElementById('btn-card-audio');
+  audioBtn.classList.toggle('hidden', !(card.audioFile && card.audioTimestamps));
+
   // Reset flip
   document.getElementById('card-inner').classList.remove('flipped');
 
@@ -1759,6 +1813,12 @@ async function handleFile(file) {
     document.getElementById('import-preview-area').style.display = '';
     document.getElementById('import-drop-zone').style.display    = 'none';
 
+    // Show audio upload area if any card has timestamps
+    const hasAudio = parsed.some(c => c.audioTimestamps);
+    document.getElementById('import-audio-area').style.display = hasAudio ? '' : 'none';
+    state.importAudioName = null;
+    document.getElementById('import-audio-status').textContent = '';
+
   } catch (err) {
     showToast('Fehler beim Lesen der Datei');
     console.error(err);
@@ -1791,17 +1851,24 @@ async function confirmImport() {
       if (!deck) deck = await db.addDeck(name);
 
       // Build card objects
-      const cardObjs = cards.map(c => ({
-        deckId:     deck.id,
-        front:      c.front,
-        back:       c.back,
-        interval:   0,
-        repetition: 0,
-        easeFactor: 2.5,
-        dueDate:    today,
-        state:      'new',
-        createdAt:  Date.now(),
-      }));
+      const cardObjs = cards.map(c => {
+        const obj = {
+          deckId:     deck.id,
+          front:      c.front,
+          back:       c.back,
+          interval:   0,
+          repetition: 0,
+          easeFactor: 2.5,
+          dueDate:    today,
+          state:      'new',
+          createdAt:  Date.now(),
+        };
+        if (c.audioTimestamps) {
+          obj.audioFile = state.importAudioName || null;
+          obj.audioTimestamps = c.audioTimestamps;
+        }
+        return obj;
+      });
 
       await db.addCards(cardObjs);
     }
@@ -2283,6 +2350,72 @@ async function confirmRename() {
 }
 
 // ════════════════════════════════════════════════════════════
+// AUDIO PLAYBACK
+// ════════════════════════════════════════════════════════════
+let _audioEl = null;
+let _audioStopAt = null;
+let _audioRepIdx = 0;
+let _audioReps = [];
+
+function parseAudioTimestamps(str) {
+  if (!str) return [];
+  return str.split('|').map(part => {
+    const [s, e] = part.split('-').map(Number);
+    return { start: s, end: e };
+  }).filter(r => !isNaN(r.start) && !isNaN(r.end));
+}
+
+async function playCardAudio() {
+  const card = state.reviewQueue[state.reviewIdx];
+  if (!card || !card.audioFile || !card.audioTimestamps) return;
+
+  const btn = document.getElementById('btn-card-audio');
+
+  // If already playing, stop
+  if (_audioEl && !_audioEl.paused) {
+    stopCardAudio();
+    return;
+  }
+
+  const reps = parseAudioTimestamps(card.audioTimestamps);
+  if (reps.length === 0) return;
+
+  // Cycle through repetitions on repeated presses
+  _audioReps = reps;
+  _audioRepIdx = (_audioRepIdx + 1) % reps.length;
+  // First press always plays first rep
+  if (!_audioEl) _audioRepIdx = 0;
+
+  const rep = reps[_audioRepIdx];
+
+  // Load audio blob from IndexedDB if needed
+  if (!_audioEl || _audioEl.dataset.name !== card.audioFile) {
+    const rec = await db.getAudio(card.audioFile);
+    if (!rec) { showToast('Audio-Datei nicht gefunden'); return; }
+    if (_audioEl) { _audioEl.pause(); URL.revokeObjectURL(_audioEl.src); }
+    _audioEl = new Audio(URL.createObjectURL(rec.blob));
+    _audioEl.dataset.name = card.audioFile;
+    _audioEl.addEventListener('timeupdate', () => {
+      if (_audioStopAt != null && _audioEl.currentTime >= _audioStopAt) {
+        stopCardAudio();
+      }
+    });
+  }
+
+  btn.classList.add('playing');
+  _audioEl.currentTime = Math.max(0, rep.start - 0.15);
+  _audioStopAt = rep.end;
+  _audioEl.play();
+}
+
+function stopCardAudio() {
+  if (_audioEl) _audioEl.pause();
+  _audioStopAt = null;
+  const btn = document.getElementById('btn-card-audio');
+  btn.classList.remove('playing');
+}
+
+// ════════════════════════════════════════════════════════════
 // TOAST
 // ════════════════════════════════════════════════════════════
 let toastTimer;
@@ -2404,6 +2537,25 @@ function wireEvents() {
 
   document.getElementById('btn-confirm-import').addEventListener('click', confirmImport);
   document.getElementById('btn-import-back').addEventListener('click', () => navigate('home'));
+
+  // Audio file import
+  document.getElementById('btn-audio-pick').addEventListener('click', () => {
+    document.getElementById('audio-file-input').click();
+  });
+  document.getElementById('audio-file-input').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    state.importAudioName = f.name;
+    await db.putAudio(f.name, f);
+    document.getElementById('import-audio-status').textContent = `✔ ${f.name} gespeichert`;
+    e.target.value = '';
+  });
+
+  // Review: audio play button
+  document.getElementById('btn-card-audio').addEventListener('click', e => {
+    e.stopPropagation(); // don't trigger card flip
+    playCardAudio();
+  });
 
   // Backup modal
   document.getElementById('btn-export-json').addEventListener('click', exportJSON);
